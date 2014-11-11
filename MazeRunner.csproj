@@ -68,6 +68,7 @@
     <Compile Include="CustomBar.xaml.cs">
       <DependentUpon>CustomBar.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Level.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
