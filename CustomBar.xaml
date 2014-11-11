@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="MazeRunner.CustomBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+			 MinHeight="20" x:Name="_customBar" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+             d:DesignHeight="30" d:DesignWidth="300" SizeChanged="CustomBar_OnSizeChanged">
+	<Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+		<Grid.Resources>
+			<SolidColorBrush x:Key="ProgressBarBorder">Black</SolidColorBrush>
+		</Grid.Resources>
+		<Border x:Name="_customBarUnfilled" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="{StaticResource ProgressBarBorder}" >
+			<Border.Background>
+				<SolidColorBrush Color="{Binding BackgroundColor, ElementName=_customBar}"/>
+			</Border.Background>
+		</Border>
+		<Border x:Name="_progressBar" Margin="1" HorizontalAlignment="Left" Width="{Binding CustomBarWidth, ElementName=_customBar}" VerticalAlignment="Stretch">
+			<Border.Background>
+				<SolidColorBrush Color="{Binding BarColor, ElementName=_customBar}"/>
+			</Border.Background>
+		</Border>
+	</Grid>
+</UserControl>
