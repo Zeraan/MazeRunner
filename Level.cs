@@ -25,6 +25,17 @@ namespace MazeRunner
 		public Tile[,] Tiles;
 		public int Width;
 		public int Height;
+		public const int MAX_ROOMS = 9;
+
+		public int AllocRooms
+		{
+			get
+			{
+				var area = Width * Height;
+				var roomArea = MAX_ROOMS * MAX_ROOMS;
+				return area / roomArea;
+			}
+		}
 
 		public string RoomLayout { get; set; }
 		public Point StartingPoint { get; set; }
@@ -88,7 +99,12 @@ namespace MazeRunner
 
 		private void ScatterRooms()
 		{
-			throw new NotImplementedException();
+			var numOfRooms = AllocRooms;
+
+			for (int i = 0; i < numOfRooms; i++)
+			{
+				PlaceRoom();
+			}
 		}
 
 		private void PackRooms()
@@ -110,6 +126,11 @@ namespace MazeRunner
 					}
 				}
 			}
+		}
+
+		private void PlaceRoom()
+		{
+
 		}
 
 		private void OpenRooms()
