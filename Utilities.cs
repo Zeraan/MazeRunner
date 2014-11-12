@@ -27,6 +27,11 @@ namespace MazeRunner
 				CellSize		= 18			//pixels
 			};
 		}
+
+		public Level CreateLevel(int levelNumber, MazeOptions mazeOptions)
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 	

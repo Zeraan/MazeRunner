@@ -24,6 +24,7 @@ namespace MazeRunner
 		public Tile[,] Tiles;
 		public int Width;
 		public int Height;
+		public string RoomLayout { get; set; }
 
 		public Level(int levelNumber)
 		{
@@ -59,7 +60,40 @@ namespace MazeRunner
 
 		private void PlaceRooms()
 		{
+			if (RoomLayout == "Packed")
+			{
+				PackRooms();
+			}
+			else
+			{
+				ScatterRooms();
+			}
+		}
 
+		private void ScatterRooms()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void PackRooms()
+		{
+			Random random = new Random();
+			for (int i = 0; i < Tiles.GetLength(0);  ++i)
+			{
+				int rowNumber = i * 2 + 1;
+				for (int j = 0; j < Tiles.GetLength(1); ++j)
+				{
+					int colNumber = (j * 2) + 1;
+					if (Tiles[rowNumber, colNumber].TileType == TileType.Room)
+					{
+						continue;
+					}
+					if ((i == 0 || j == 0) && random.Next(2) > 0)
+					{
+						continue;
+					}
+				}
+			}
 		}
 
 		private void OpenRooms()
