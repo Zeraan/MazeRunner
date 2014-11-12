@@ -7,15 +7,38 @@ using System.Windows;
 
 namespace MazeRunner
 {
-	public enum TileType { Nothing, Blocked, Room, Corridor, Perimeter, Entrance, Arch, Door, Locked, Trapped, Secret, Portc, StairsDown, StairsUp, OutOfBounds }
-	public class Hit
-	{
-		public bool Blocked { get; set; }
-		public int[] RoomsHit { get; set; }
-	}
+	//public enum TileType { Nothing, Blocked, Room, Corridor, Perimeter, Entrance, Arch, Door, Locked, Trapped, Secret, Portc, StairsDown, StairsUp, OutOfBounds }
 	public class Tile
 	{
-		public TileType TileType { get; set; }
+		public const uint NOTHING		= 0x00000000;
+		public const uint BLOCKED		= 0x00000001;
+		public const uint ROOM			= 0x00000002;
+		public const uint CORRIDOR		= 0x00000004;
+		public const uint PERIMETER		= 0x00000010;
+		public const uint ENTRANCE		= 0x00000020;
+		public const uint ROOM_ID		= 0x0000FFC0;
+		public const uint ARCH			= 0x00010000;
+		public const uint DOOR			= 0x00020000;
+		public const uint LOCKED		= 0x00040000;
+		public const uint TRAPPED		= 0x00080000;
+		public const uint SECRET		= 0x00100000;
+		public const uint PORTC			= 0x00200000;
+		public const uint STAIR_DN		= 0x00400000;
+		public const uint STAIR_UP		= 0x00800000;
+		public const uint LABEL			= 0xFF000000;
+
+		public const uint OPENSPACE		= ROOM | CORRIDOR;
+		public const uint DOORSPACE		= ARCH | DOOR | LOCKED | TRAPPED | SECRET | PORTC;
+		public const uint ESPACE		= ENTRANCE | DOORSPACE | 0xFF000000;
+		public const uint STAIRS		= STAIR_DN | STAIR_UP;
+
+		public const uint BLOCK_ROOM	= BLOCKED | ROOM;
+		public const uint BLOCK_CORR	= BLOCKED | PERIMETER | CORRIDOR;
+		public const uint BLOCK_DOOR	= BLOCKED | DOORSPACE;
+
+		public uint Flags;
+
+		//public TileType TileType { get; set; }
 		public bool Opened { get; set; } //For use with doors
 		public bool Unlocked { get; set; }
 		public int Row { get; set; }
@@ -29,14 +52,36 @@ namespace MazeRunner
 		//TODO: Add reference to entities (enemies or player)
 		//Entity Entity { get; set; }
 	}
+
+	public class Room
+	{
+		public uint ID;
+		public int Row;
+		public int Column;
+		public int North;
+		public int South;
+		public int West;
+		public int East;
+		public int Height;
+		public int Width;
+		public int Area;
+	}
+
 	public class Level
 	{
 		public Tile[,] Tiles;
+		public Dictionary<uint, Room> Rooms;
 		public int Width;
 		public int Height;
+		public int N_I;
+		public int N_J;
 		public int MaxRow { get; set; }
 		public int MaxColumn { get; set; }
-		public int N_Rooms { get; set; }
+		public int MinRoomSize { get; set; }
+		public int MaxRoomSize { get; set; }
+		public int RoomBase { get { return (MinRoomSize + 1) / 2; } }
+		public int RoomRadix { get { return ((MaxRoomSize - MinRoomSize) / 2) + 1; } }
+		public uint N_Rooms { get; set; }
 		public const int MAX_ROOMS = 9;
 
 		public int AllocRooms
@@ -58,8 +103,21 @@ namespace MazeRunner
 		public Level(int levelNumber)
 		{
 			Random r = new Random();
+			Rooms = new Dictionary<uint, Room>();
 			Width = r.Next(20,101);
 			Height = r.Next(20, 101);
+			MinRoomSize = 3;
+			MaxRoomSize = 9;
+			if (Width % 2 == 0)
+			{
+				Width++; //Must be odd number
+			}
+			if (Height % 2 == 0)
+			{
+				Height++; //Must be odd number
+			}
+			N_I = Width / 2;
+			N_J = Height / 2;
 			GenerateRandomLevel(levelNumber);
 			SetStartingPoint();
 		}
@@ -93,7 +151,7 @@ namespace MazeRunner
 				for (int j = 0; j < Height; j++)
 				{
 					Tiles[i,j] = new Tile();
-					Tiles[i,j].TileType = TileType.Nothing;
+					Tiles[i,j].Flags = Tile.NOTHING;
 				}
 			}
 		}
@@ -123,13 +181,13 @@ namespace MazeRunner
 		private void PackRooms()
 		{
 			Random random = new Random();
-			for (int i = 0; i < Tiles.GetLength(0);  ++i)
+			for (int i = 0; i < N_I;  ++i)
 			{
 				int rowNumber = i * 2 + 1;
-				for (int j = 0; j < Tiles.GetLength(1); ++j)
+				for (int j = 0; j < N_J; ++j)
 				{
 					int colNumber = (j * 2) + 1;
-					if (Tiles[rowNumber, colNumber].TileType == TileType.Room)
+					if ((Tiles[rowNumber, colNumber].Flags & Tile.ROOM) == Tile.ROOM)
 					{
 						continue;
 					}
@@ -137,23 +195,24 @@ namespace MazeRunner
 					{
 						continue;
 					}
+					PlaceRoom(i, j);
 				}
 			}
 		}
 
-		private void PlaceRoom(Tile roomTile = null)
+		private void PlaceRoom(int i = -1, int j = -1, int width = 0, int height = 0)
 		{
 			if (RoomCount == 999)
 			{
 				return;
 			}
 
-			roomTile = Utilities.SetRoom(roomTile);
+			SetRoom(ref i, ref j, ref width, ref height);
 
-			int row1		= (roomTile.Row * 2) + 1;
-			int column1	= (roomTile.Column * 2) + 1;
-			int row2		= ((roomTile.Row + roomTile.Width) * 2) - 1;
-			int column2	= ((roomTile.Column + roomTile.Height) * 2) - 1;
+			int row1 = i * 2 + 1;
+			int column1	= j * 2 + 1;
+			int row2 = (i + height) * 2 - 1;
+			int column2	= (j + width) * 2 - 1;
 
 			if (row1 < 1 || row2 > MaxRow)
 			{
@@ -164,32 +223,139 @@ namespace MazeRunner
 				return;
 			}
 
-			Hit hit = SoundRoom(row1, column1, row2, column2);
-			if (hit.Blocked || hit.RoomsHit.Length > 0)
+			if (!SoundRoom(row1, column1, row2, column2))
 			{
+				//Room is not in a valid location, exit
 				return;
 			}
 
-			int roomID = N_Rooms + 1;
+			uint roomID = N_Rooms + 1;
 			N_Rooms = roomID;
 			LastRoomID = roomID;
 
+			//place room
 			for (int r = row1; r <= row2; r++)
 			{
 				for (int c = column1; c <= column2; c++)
 				{
-					if (Tiles[r,c].TileType == TileType.Entrance)
+					if ((Tiles[r,c].Flags & Tile.ENTRANCE) == Tile.ENTRANCE)
 					{
-						
-
+						Tiles[r,c].Flags &= ~Tile.ESPACE;
 					}
+					else if ((Tiles[r,c].Flags & Tile.PERIMETER) == Tile.PERIMETER)
+					{
+						Tiles[r,c].Flags &= ~Tile.PERIMETER;
+					}
+					Tiles[r,c].Flags |= Tile.ROOM | roomID << 6;
+				}
+			}
+			Room room = new Room 
+			{
+				ID = roomID,
+				Row = row1,
+				Column = column1,
+				North = row1,
+				South = row2,
+				West = column1,
+				East = column2,
+				Height = height,
+				Width = width,
+				Area = height * width
+			};
+			Rooms[roomID] = room;
+
+			for (int r = row1 - 1; r <= row2 + 1; r++)
+			{
+				if ((Tiles[r,column1 - 1].Flags & Tile.ROOM) != Tile.ROOM && (Tiles[r,column1 - 1].Flags & Tile.ENTRANCE) != Tile.ENTRANCE)
+				{
+					Tiles[r,column1 - 1].Flags |= Tile.PERIMETER;
+				}
+				if ((Tiles[r, column2 + 1].Flags & Tile.ROOM) != Tile.ROOM && (Tiles[r, column2 + 1].Flags & Tile.ENTRANCE) != Tile.ENTRANCE)
+				{
+					Tiles[r, column2 + 1].Flags |= Tile.PERIMETER;
+				}
+			}
+			for (int c = column1 - 1; c <= column2 + 1; c++)
+			{
+				if ((Tiles[row1 - 1, c].Flags & Tile.ROOM) != Tile.ROOM && (Tiles[row1 - 1, c].Flags & Tile.ENTRANCE) != Tile.ENTRANCE)
+				{
+					Tiles[row1 - 1, c].Flags |= Tile.PERIMETER;
+				}
+				if ((Tiles[row2 + 1, c].Flags & Tile.ROOM) != Tile.ROOM && (Tiles[row2 + 1, c].Flags & Tile.ENTRANCE) != Tile.ENTRANCE)
+				{
+					Tiles[row2 + 1, c].Flags |= Tile.PERIMETER;
 				}
 			}
 		}
 
-		private Hit SoundRoom(int row1, int column1, int row2, int column2)
+		private void SetRoom(ref int i, ref int j, ref int width, ref int height)
 		{
-			throw new NotImplementedException();
+			var random = new Random();
+			var roomBase = RoomBase;
+			var radix = RoomRadix;
+
+			if (height == 0)
+			{
+				if (i != -1)
+				{
+					var a = N_I - roomBase - i;
+					if (a < 0)
+					{
+						a = 0;
+					}
+					var r = a < radix ? a : radix;
+					height = random.Next(r) + roomBase;
+				}
+				else
+				{
+					height = random.Next(radix) + roomBase;
+				}
+			}
+			if (width == 0)
+			{
+				if (j != -1)
+				{
+					var a = N_J - roomBase - j;
+					if (a < 0)
+					{
+						a = 0;
+					}
+					var r = a < radix ? a : radix;
+					width = random.Next(r) + roomBase;
+				}
+				else
+				{
+					width = random.Next(radix) + roomBase;
+				}
+			}
+			if (i == -1)
+			{
+				i = random.Next(N_I - height);
+			}
+			if (j == -1)
+			{
+				j = random.Next(N_J - width);
+			}
+		}
+
+		private bool SoundRoom(int row1, int column1, int row2, int column2)
+		{
+			for (int r = row1; r <= row2; r++)
+			{
+				for (int c = column1; c <= column2; c++)
+				{
+					if ((Tiles[c,r].Flags & Tile.BLOCKED) == Tile.BLOCKED)
+					{
+						return false;
+					}
+					else if ((Tiles[c,r].Flags & Tile.ROOM) == Tile.ROOM)
+					{
+						return false;
+					}
+				}
+			}
+			//No blocked or overlapping rooms, so can place room here
+			return true;
 		}
 
 		private void OpenRooms()
@@ -217,7 +383,7 @@ namespace MazeRunner
 
 		}
 
-		public int LastRoomID { get; set; }
+		public uint LastRoomID { get; set; }
 	}
 
 	public class LevelManager

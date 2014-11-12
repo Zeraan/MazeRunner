@@ -104,7 +104,7 @@ namespace MazeRunner
 				for (int y = (int) startPoint.Y; y <= endPoint.Y; y++)
 				{
 					if (x < 0 || x >= CurrentLevel.Width || y < 0 || y >= CurrentLevel.Height)
-						VisibleTiles.Add(new Tile() {TileType = TileType.OutOfBounds});
+						VisibleTiles.Add(new Tile() { Flags = Tile.BLOCKED});
 					else VisibleTiles.Add(CurrentLevel.Tiles[x, y]);
 				}
 			}
@@ -121,7 +121,7 @@ namespace MazeRunner
 				for (int y = (int)startPoint.Y; y <= endPoint.Y; y++)
 				{
 					if (x < 0 || x >= CurrentLevel.Width || y < 0 || y >= CurrentLevel.Height)
-						VisibleTiles.Add(new Tile() { TileType = TileType.OutOfBounds });
+						VisibleTiles.Add(new Tile() { Flags = Tile.BLOCKED });
 					else VisibleTiles.Add(CurrentLevel.Tiles[x, y]);
 				}
 			}
