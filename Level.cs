@@ -8,11 +8,20 @@ using System.Windows;
 namespace MazeRunner
 {
 	public enum TileType { Nothing, Blocked, Room, Corridor, Perimeter, Entrance, Arch, Door, Locked, Trapped, Secret, Portc, StairsDown, StairsUp, OutOfBounds }
+	public class Hit
+	{
+		public bool Blocked { get; set; }
+		public int[] RoomsHit { get; set; }
+	}
 	public class Tile
 	{
 		public TileType TileType { get; set; }
 		public bool Opened { get; set; } //For use with doors
 		public bool Unlocked { get; set; }
+		public int Row { get; set; }
+		public int Column { get; set; }
+		public int Width { get; set; }
+		public int Height { get; set; }
 		
 		//TODO: Add items
 		//public List<Item> ItemsOnFloor { get; private set; }
@@ -25,6 +34,9 @@ namespace MazeRunner
 		public Tile[,] Tiles;
 		public int Width;
 		public int Height;
+		public int MaxRow { get; set; }
+		public int MaxColumn { get; set; }
+		public int N_Rooms { get; set; }
 		public const int MAX_ROOMS = 9;
 
 		public int AllocRooms
@@ -38,6 +50,7 @@ namespace MazeRunner
 		}
 
 		public string RoomLayout { get; set; }
+		public int RoomCount { get; set; }
 		public Point StartingPoint { get; set; }
 		// TODO: Add list of entities and items on floor to level 
 
@@ -128,9 +141,55 @@ namespace MazeRunner
 			}
 		}
 
-		private void PlaceRoom()
+		private void PlaceRoom(Tile roomTile = null)
 		{
+			if (RoomCount == 999)
+			{
+				return;
+			}
 
+			roomTile = Utilities.SetRoom(roomTile);
+
+			int row1		= (roomTile.Row * 2) + 1;
+			int column1	= (roomTile.Column * 2) + 1;
+			int row2		= ((roomTile.Row + roomTile.Width) * 2) - 1;
+			int column2	= ((roomTile.Column + roomTile.Height) * 2) - 1;
+
+			if (row1 < 1 || row2 > MaxRow)
+			{
+				return;
+			}
+			if (column1 < 1 || column2 > MaxColumn)
+			{
+				return;
+			}
+
+			Hit hit = SoundRoom(row1, column1, row2, column2);
+			if (hit.Blocked || hit.RoomsHit.Length > 0)
+			{
+				return;
+			}
+
+			int roomID = N_Rooms + 1;
+			N_Rooms = roomID;
+			LastRoomID = roomID;
+
+			for (int r = row1; r <= row2; r++)
+			{
+				for (int c = column1; c <= column2; c++)
+				{
+					if (Tiles[r,c].TileType == TileType.Entrance)
+					{
+						
+
+					}
+				}
+			}
+		}
+
+		private Hit SoundRoom(int row1, int column1, int row2, int column2)
+		{
+			throw new NotImplementedException();
 		}
 
 		private void OpenRooms()
@@ -157,6 +216,8 @@ namespace MazeRunner
 		{
 
 		}
+
+		public int LastRoomID { get; set; }
 	}
 
 	public class LevelManager

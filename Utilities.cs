@@ -32,6 +32,11 @@ namespace MazeRunner
 		{
 			throw new NotImplementedException();
 		}
+
+		internal static Tile SetRoom(Tile roomTile)
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 	
