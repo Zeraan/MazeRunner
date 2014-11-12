@@ -358,9 +358,34 @@ namespace MazeRunner
 			return true;
 		}
 
+		//Places openings for doors and corridors
 		private void OpenRooms()
 		{
+			foreach (var room in Rooms)
+			{
+				OpenRoom(room.Value);
+			}
+		}
 
+		private void OpenRoom(Room room)
+		{
+
+		}
+
+		private void AllocOpens(Room room)
+		{
+			throw new NotImplementedException();
+		}
+
+		//List available sills (doorways?)
+		private void DoorSills(Room room)
+		{
+			throw new NotImplementedException();
+		}
+
+		private void CheckSill()
+		{
+			throw new NotImplementedException();
 		}
 
 		private void LabelRooms()
