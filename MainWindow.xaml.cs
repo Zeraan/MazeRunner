@@ -23,6 +23,8 @@ namespace MazeRunner
 		public MainWindow()
 		{
 			InitializeComponent();
+			Game game = new Game();
+			DataContext = game;
 		}
 	}
 }
