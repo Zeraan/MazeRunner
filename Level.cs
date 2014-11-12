@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MazeRunner
 {
-	public enum TileType { Nothing, Blocked, Room, Corridor, Perimeter, Entrance, Arch, Door, Locked, Trapped, Secret, Portc, StairsDown, StairsUp }
+	public enum TileType { Nothing, Blocked, Room, Corridor, Perimeter, Entrance, Arch, Door, Locked, Trapped, Secret, Portc, StairsDown, StairsUp, OutOfBounds }
 	public class Tile
 	{
 		public TileType TileType { get; set; }
@@ -24,7 +25,11 @@ namespace MazeRunner
 		public Tile[,] Tiles;
 		public int Width;
 		public int Height;
+
 		public string RoomLayout { get; set; }
+		public Point StartingPoint { get; set; }
+		// TODO: Add list of entities and items on floor to level 
+
 
 		public Level(int levelNumber)
 		{
@@ -32,6 +37,17 @@ namespace MazeRunner
 			Width = r.Next(20,101);
 			Height = r.Next(20, 101);
 			GenerateRandomLevel(levelNumber);
+			SetStartingPoint();
+		}
+
+		public void SetStartingPoint()
+		{
+			Random r = new Random();
+			// TODO: when placing player, check to make sure location is a valid position without monsters close by
+			int x = r.Next(0, Width - 1);
+			int y = r.Next(0, Height - 1);
+
+			StartingPoint = new Point(x,y);
 		}
 
 		private void GenerateRandomLevel(int levelNumber)

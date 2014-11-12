@@ -69,6 +69,7 @@
     <Compile Include="CustomBar.xaml.cs">
       <DependentUpon>CustomBar.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Game.cs" />
     <Compile Include="Level.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -83,6 +84,7 @@
     <Compile Include="MazeControl.xaml.cs">
       <DependentUpon>MazeControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
