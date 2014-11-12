@@ -53,6 +53,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Utilities.cs" />
     <Page Include="CustomBar.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
