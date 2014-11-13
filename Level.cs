@@ -7,6 +7,7 @@ using System.Windows;
 
 namespace MazeRunner
 {
+	public enum DoorType { ARCH, DOOR, LOCKED, TRAPPED, SECRET, PORTC }
 	//public enum TileType { Nothing, Blocked, Room, Corridor, Perimeter, Entrance, Arch, Door, Locked, Trapped, Secret, Portc, StairsDown, StairsUp, OutOfBounds }
 	public class Tile
 	{
@@ -67,6 +68,34 @@ namespace MazeRunner
 		public int Area;
 	}
 
+	public class Sill
+	{
+		public int Sill_R;
+		public int Sill_C;
+		public int CDir;
+		public int RDir;
+		public int Door_R;
+		public int Door_C;
+		public uint Out_ID;
+	}
+
+	public static class ExtensionMethods
+	{
+		public static void Shuffle<T>(this IList<T> list)
+		{
+			Random rng = new Random();
+			int n = list.Count;
+			while (n > 1)
+			{
+				n--;
+				int k = rng.Next(n + 1);
+				T value = list[k];
+				list[k] = list[n];
+				list[n] = value;
+			}
+		}
+	}
+
 	public class Level
 	{
 		public Tile[,] Tiles;
@@ -75,8 +104,6 @@ namespace MazeRunner
 		public int Height;
 		public int N_I;
 		public int N_J;
-		public int MaxRow { get; set; }
-		public int MaxColumn { get; set; }
 		public int MinRoomSize { get; set; }
 		public int MaxRoomSize { get; set; }
 		public int RoomBase { get { return (MinRoomSize + 1) / 2; } }
@@ -214,11 +241,11 @@ namespace MazeRunner
 			int row2 = (i + height) * 2 - 1;
 			int column2	= (j + width) * 2 - 1;
 
-			if (row1 < 1 || row2 > MaxRow)
+			if (row1 < 1 || row2 >= Height)
 			{
 				return;
 			}
-			if (column1 < 1 || column2 > MaxColumn)
+			if (column1 < 1 || column2 >= Width)
 			{
 				return;
 			}
@@ -369,28 +396,150 @@ namespace MazeRunner
 
 		private void OpenRoom(Room room)
 		{
-
+			var doorSills = DoorSills(room);
+			if (doorSills.Count == 0)
+			{
+				return;
+			}
 		}
 
-		private void AllocOpens(Room room)
+		private int AllocOpens(Room room)
 		{
-			throw new NotImplementedException();
+			var room_h = (room.South - room.North) / 2 + 1;
+			var room_w = (room.East - room.West) / 2 + 1;
+			var flumph = (int)Math.Sqrt(room_w * room_h);
+			
+			var random = new Random();
+			return flumph + random.Next(flumph);
 		}
 
 		//List available sills (doorways?)
-		private void DoorSills(Room room)
+		private List<Sill> DoorSills(Room room)
 		{
-			throw new NotImplementedException();
+			var doorSills = new List<Sill>();
+			if (room.North >= 3)
+			{
+				for (int c = room.West; c <= room.East; c += 2)
+				{
+					var sill = CheckSill(room, c, room.North, 0, -1);
+					if (sill != null)
+					{
+						doorSills.Add(sill);
+					}
+				}
+			}
+			if (room.South <= Height - 3)
+			{
+				for (int c = room.West; c <= room.East; c += 2)
+				{
+					var sill = CheckSill(room, c, room.South, 0, 1);
+					if (sill != null)
+					{
+						doorSills.Add(sill);
+					}
+				}
+			}
+			if (room.West >= 3)
+			{
+				for (int r = room.North; r <= room.South; r += 2)
+				{
+					var sill = CheckSill(room, room.West, r, -1, 0);
+					if (sill != null)
+					{
+						doorSills.Add(sill);
+					}
+				}
+			}
+			if (room.East <= Width - 3)
+			{
+				for (int r = room.North; r <= room.South; r += 2)
+				{
+					var sill = CheckSill(room, room.East, r, 1, 0);
+					if (sill != null)
+					{
+						doorSills.Add(sill);
+					}
+				}
+			}
+			doorSills.Shuffle();
+			return doorSills;
 		}
 
-		private void CheckSill()
+		private Sill CheckSill(Room room, int sill_c, int sill_r, int cDir, int rDir)
 		{
-			throw new NotImplementedException();
+			int door_r = sill_r + rDir;
+			int door_c = sill_c + cDir;
+
+			var tile = Tiles[door_r,door_c];
+			if ((tile.Flags & Tile.PERIMETER) != Tile.PERIMETER)
+			{
+				return null;
+			}
+			if ((tile.Flags & Tile.BLOCK_DOOR) == Tile.BLOCK_DOOR)
+			{
+				return null;
+			}
+
+			int out_r = door_r + rDir;
+			int out_c = door_c + cDir;
+
+			var outTile = Tiles[out_r, out_c];
+			if ((outTile.Flags & Tile.BLOCKED) == Tile.BLOCKED)
+			{
+				return null;
+			}
+			uint out_id = 0;
+			if ((outTile.Flags & Tile.ROOM) == Tile.ROOM)
+			{
+				out_id = (outTile.Flags & Tile.ROOM_ID) >> 6;
+			}
+			if (out_id == room.ID)
+			{
+				return null;
+			}
+			return new Sill
+			{
+				Sill_C = sill_c,
+				Sill_R = sill_r,
+				CDir = cDir,
+				RDir = rDir,
+				Door_C = door_c,
+				Door_R = door_r,
+				Out_ID = out_id
+			};
+		}
+
+		private static DoorType DoorType()
+		{
+			Random r = new Random();
+
+			var value = r.Next(110);
+			if (value < 15)
+			{
+				return MazeRunner.DoorType.ARCH;
+			}
+			if (value < 60)
+			{
+				return MazeRunner.DoorType.DOOR;
+			}
+			if (value < 75)
+			{
+				return MazeRunner.DoorType.LOCKED;
+			}
+			if (value < 90)
+			{
+				return MazeRunner.DoorType.TRAPPED;
+			}
+			if (value < 100)
+			{
+				return MazeRunner.DoorType.SECRET;
+			}
+			return MazeRunner.DoorType.PORTC;
 		}
 
 		private void LabelRooms()
 		{
-
+			
 		}
 
 		private void Corridors()
