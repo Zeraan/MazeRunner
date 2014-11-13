@@ -54,6 +54,15 @@ namespace MazeRunner
 		//Entity Entity { get; set; }
 	}
 
+	public class Door
+	{
+		public int Row;
+		public int Column;
+		public DoorType Type;
+		public string TypeName;
+		public uint RoomID;
+	}
+
 	public class Room
 	{
 		public uint ID;
@@ -66,6 +75,8 @@ namespace MazeRunner
 		public int Height;
 		public int Width;
 		public int Area;
+
+		public List<Door> Doors = new List<Door>();
 	}
 
 	public class Sill
@@ -400,6 +411,90 @@ namespace MazeRunner
 			if (doorSills.Count == 0)
 			{
 				return;
+			}
+			int n_opens = AllocOpens(room);
+			Random random = new Random();
+			Tile doorTile = new Tile() { Row = -1, Column = -1 };
+			Sill aSill = null;
+			for (int i = 0; i < n_opens; i++)
+			{
+				int door_R = 0;
+				int door_C = 0;
+				do
+				{
+					if (doorSills.Count == 0)
+					{
+						aSill = null;
+						break;
+					}
+					aSill = doorSills[random.Next(doorSills.Count)];
+					doorSills.Remove(aSill);
+					door_R = aSill.Door_R;
+					door_C = aSill.Door_C;
+					doorTile = Tiles[door_R, door_C];
+				} while ((doorTile.Flags & Tile.DOORSPACE) == Tile.DOORSPACE);
+				if (aSill == null)
+				{
+					break;
+				}
+				uint out_id;
+
+				/*my $out_id; if ($out_id = $sill->{'out_id'}) {
+      my $connect = join(',',(sort($room->{'id'},$out_id)));
+      redo if ($dungeon->{'connect'}{$connect}++);
+    }*/
+
+				int open_r = aSill.Sill_R;
+				int open_c = aSill.Sill_C;
+				int open_cDir = aSill.CDir;
+				int open_rDir = aSill.RDir;
+
+				for (int x = 0; x < 3; x++)
+				{
+					int r = open_r + (open_rDir * x);
+					int c = open_c + (open_cDir * x);
+
+					var tile = Tiles[r,c];
+					tile.Flags &= ~Tile.PERIMETER;
+					tile.Flags |= Tile.ENTRANCE;
+				}
+
+				var doorType = DoorType();
+				var door = new Door
+				{
+					Column = door_C,
+					Row = door_R,
+					Type = doorType
+				};
+				switch (doorType)
+				{
+					case MazeRunner.DoorType.ARCH:
+						Tiles[door_R,door_C].Flags |= Tile.ARCH;
+						door.TypeName = "ArchWay";
+						break;
+					case MazeRunner.DoorType.DOOR:
+						Tiles[door_R,door_C].Flags |= Tile.DOOR;
+						door.TypeName = "Unlocked Door";
+						break;
+					case MazeRunner.DoorType.LOCKED:
+						Tiles[door_R,door_C].Flags |= Tile.LOCKED;
+						door.TypeName = "Locked Door";
+						break;
+					case MazeRunner.DoorType.TRAPPED:
+						Tiles[door_R,door_C].Flags |= Tile.TRAPPED;
+						door.TypeName = "Trapped Door";
+						break;
+					case MazeRunner.DoorType.SECRET:
+						Tiles[door_R,door_C].Flags |= Tile.SECRET;
+						door.TypeName = "Secret Door";
+						break;
+					case MazeRunner.DoorType.PORTC:
+						Tiles[door_R,door_C].Flags |= Tile.PORTC;
+						door.TypeName = "Portcullis";
+						break;
+				}
+				//$door->{'out_id'} = $out_id if ($out_id);
+				room.Doors.Add(door);
 			}
 		}
 
