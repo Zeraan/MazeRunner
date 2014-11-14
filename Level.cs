@@ -134,6 +134,7 @@ namespace MazeRunner
 		public int Column;
 		public int RowNext;
 		public int ColumnNext;
+		public bool IsDownward;
 	}
 
 	public class Room
@@ -184,6 +185,7 @@ namespace MazeRunner
 	{
 		public Tile[,] Tiles;
 		public Dictionary<int, Room> Rooms;
+		public List<Stair> Stairs;
 		public int Width;
 		public int Height;
 		public int N_I;
@@ -829,7 +831,34 @@ namespace MazeRunner
 
 		private void PlaceStairs()
 		{
+			Random random = new Random();
+			int n = 2; //For now, we have an entry and exit stairs, so totalling of 2 stairs
+			var possibleStairs = StairEnds();
+			if (possibleStairs.Count == 0) //No valid locations
+			{
+				return;
+			}
+			for (int i = 0; i < n; i++)
+			{
+				var stair = possibleStairs[random.Next(possibleStairs.Count)];
+				possibleStairs.Remove(stair);
+				
+				int r = stair.Row;
+				int c = stair.Column;
+				int type = i < 2 ? i : random.Next(2);
 
+				if (type == 0)
+				{
+					Tiles[r,c].Flags |= Tile.STAIR_DN;
+					stair.IsDownward = true;
+				}
+				else
+				{
+					Tiles[r, c].Flags |= Tile.STAIR_UP;
+					stair.IsDownward = false;
+				}
+				Stairs.Add(stair);
+			}
 		}
 
 		private List<Stair> StairEnds()
