@@ -46,6 +46,7 @@ namespace MazeRunner
 		public int Width { get; set; }
 		public int Height { get; set; }
 		public int Room_ID { get; set; }
+		public char Character { get; set; }
 		
 		//TODO: Add items
 		//public List<Item> ItemsOnFloor { get; private set; }
@@ -644,7 +645,24 @@ namespace MazeRunner
 
 		private void Corridors()
 		{
+			for (int i = 1; i < N_I; i++)
+			{
+				int row = (i * 2) + 1;
+				for (int j = 1; j < N_J; j++)
+				{
+					int column = (j * 2) + 1;
+					if ((Tiles[row,column].Flags & Tile.CORRIDOR) == Tile.CORRIDOR)
+					{
+						continue;
+					}
+					Tunnel(i, j);
+				}
+			}
+		}
 
+		private void Tunnel(int i, int j)
+		{
+			throw new NotImplementedException();
 		}
 
 		private void PlaceStairs()
