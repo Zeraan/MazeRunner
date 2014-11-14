@@ -72,6 +72,13 @@ namespace MazeRunner
 		};
 	}
 
+	public static class CorridorLayout
+	{
+		public const int LABYRINTH = 0;
+		public const int BENT = 50;
+		public const int STRAIGHT = 100;
+	}
+
 	public class Door
 	{
 		public int Row;
@@ -140,7 +147,7 @@ namespace MazeRunner
 		public int N_Rooms { get; set; }
 		public int LastRoomID { get; set; }
 		public const int MAX_ROOMS = 9;
-
+		
 		public int AllocRooms
 		{
 			get
@@ -151,6 +158,7 @@ namespace MazeRunner
 			}
 		}
 
+		public int? CorridorLayout { get; set; }
 		public string RoomLayout { get; set; }
 		public int RoomCount { get; set; }
 		public Point StartingPoint { get; set; }
@@ -693,12 +701,82 @@ namespace MazeRunner
 
 		private string[] TunnelDirections(string lastDirection)
 		{
-			throw new NotImplementedException();
+			var directionKeysCopy = new List<string>(Direction.DJ.Keys.ToList<string>());
+			if (!string.IsNullOrEmpty(lastDirection) && CorridorLayout != null)
+			{
+				Random random = new Random();
+				if (random.Next(MazeRunner.CorridorLayout.STRAIGHT) < CorridorLayout)
+				{
+					directionKeysCopy.Remove(lastDirection);
+				}
+			}
+			return directionKeysCopy.ToArray();
 		}
 
 		private bool OpenTunnel(int i, int j, string dir)
 		{
-			throw new NotImplementedException();
+			int thisRow = (i * 2) + 1;
+			int thisColumn = (j * 2) + 1;
+			int nextRow = ((i + Direction.DI[dir]) * 2) + 1;
+			int nextColumn = ((j + Direction.DJ[dir] * 2)) + 1;
+			int midRow = (thisRow + nextRow) / 2;
+			int midColumn = (thisColumn + nextColumn) / 2;
+
+			if (SoundTunnel(midRow, midColumn, nextRow, nextColumn))
+			{
+				return DelveTunnel(thisRow, thisColumn, nextRow, nextColumn);
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		private bool DelveTunnel(int thisRow, int thisColumn, int nextRow, int nextColumn)
+		{
+			int r1 = Math.Min(thisRow, nextRow);
+			int r2 = Math.Max(thisRow, nextRow);
+			int c1 = Math.Min(thisColumn, nextColumn);
+			int c2 = Math.Max(thisColumn, nextColumn);
+
+			for (int r = r1; r <= r2; r++)
+			{
+				for (int c = c1; c <= c2; c++)
+				{
+					Tiles[r, c].Flags &=~ Tile.ENTRANCE;
+					Tiles[r, c].Flags |= Tile.CORRIDOR;
+				}
+			}
+			return true;
+		}
+
+		private bool SoundTunnel(int midRow, int midColumn, int nextRow, int nextColumn)
+		{
+			if (nextRow < 0 || nextRow > Height)
+			{
+				return false;
+			}
+			if (nextColumn< 0 || nextColumn > Width)
+			{
+				return false;
+			}
+
+			int r1 = Math.Min(midRow, nextRow);
+			int r2 = Math.Max(midRow, nextRow);
+			int c1 = Math.Min(midColumn, nextColumn);
+			int c2 = Math.Max(midColumn, nextColumn);
+
+			for (int r = r1; r <= r2; r++)
+			{
+				for (int c = c1; c <= c2; c++)
+				{
+					if ((Tiles[r,c].Flags & Tile.BLOCK_CORR) == Tile.BLOCK_CORR)
+					{
+						return false;
+					}
+				}
+			}
+				return true;
 		}
 
 		private void PlaceStairs()
