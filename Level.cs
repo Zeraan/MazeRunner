@@ -55,6 +55,23 @@ namespace MazeRunner
 		//Entity Entity { get; set; }
 	}
 
+	public static class Direction
+	{
+		public static Dictionary<string, int> DI = new Dictionary<string,int> {
+			{ "north", -1 },
+			{ "south", 1 },
+			{ "west", 0},
+			{ "east", 0}
+		};
+
+		public static Dictionary<string, int> DJ = new Dictionary<string, int> {
+			{ "north", 0 },
+			{ "south", 0 },
+			{ "west", -1},
+			{ "east", 1}
+		};
+	}
+
 	public class Door
 	{
 		public int Row;
@@ -660,7 +677,26 @@ namespace MazeRunner
 			}
 		}
 
-		private void Tunnel(int i, int j)
+		private void Tunnel(int i, int j, string lastDirection = "")
+		{
+			string[] directions = TunnelDirections(lastDirection);
+			foreach (string dir in directions)
+			{
+				if (OpenTunnel(i, j, dir))
+				{
+					int nextI = i + Direction.DI[dir];
+					int nextJ = j + Direction.DJ[dir];
+					Tunnel(nextI, nextJ, dir);
+				}
+			}
+		}
+
+		private string[] TunnelDirections(string lastDirection)
+		{
+			throw new NotImplementedException();
+		}
+
+		private bool OpenTunnel(int i, int j, string dir)
 		{
 			throw new NotImplementedException();
 		}
