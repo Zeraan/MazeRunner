@@ -72,6 +72,41 @@ namespace MazeRunner
 		};
 	}
 
+	public static class StairData
+	{
+		public static Dictionary<string, Dictionary<string, List<int[]>>> StairEnd = new Dictionary<string,Dictionary<string,List<int[]>>>
+		{
+			{ "north", new Dictionary<string, List<int[]>>{
+					 {"walled", new List<int[]>{new[]{1,-1},new[]{0,-1},new[]{-1,-1},new[]{-1,0},new[]{-1,1},new[]{0,1},new[]{1,1}}},
+					 {"corridor", new List<int[]>{new[]{0,0},new[]{1,0},new[]{2,0}}},
+					 {"stair", new List<int[]>{new[]{0,0}}},
+					 {"next", new List<int[]>{new[]{1,0}}}
+				}
+			},
+			{ "south", new Dictionary<string, List<int[]>>{
+					 {"walled", new List<int[]>{new[]{-1,-1},new[]{0,-1},new[]{1,-1},new[]{1,0},new[]{1,1},new[]{0,1},new[]{-1,1}}},
+					 {"corridor", new List<int[]>{new[]{0,0},new[]{-1,0},new[]{-2,0}}},
+					 {"stair", new List<int[]>{new[]{0,0}}},
+					 {"next", new List<int[]>{new[]{-1,0}}}
+				}
+			},
+			{ "west", new Dictionary<string, List<int[]>>{
+					 {"walled", new List<int[]>{new[]{-1,1},new[]{-1,0},new[]{-1,-1},new[]{0,-1},new[]{1,-1},new[]{1,0},new[]{1,1}}},
+					 {"corridor", new List<int[]>{new[]{0,0},new[]{0,1},new[]{0,2}}},
+					 {"stair", new List<int[]>{new[]{0,0}}},
+					 {"next", new List<int[]>{new[]{0,1}}}
+				}
+			},
+			{ "east", new Dictionary<string, List<int[]>>{
+					 {"walled", new List<int[]>{new[]{-1,-1},new[]{-1,0},new[]{-1,1},new[]{0,1},new[]{1,1},new[]{1,0},new[]{1,-1}}},
+					 {"corridor", new List<int[]>{new[]{0,0},new[]{0,-1},new[]{0,-2}}},
+					 {"stair", new List<int[]>{new[]{0,0}}},
+					 {"next", new List<int[]>{new[]{0,-1}}}
+				}
+			}
+		};
+	}
+
 	public static class CorridorLayout
 	{
 		public const int LABYRINTH = 0;
@@ -821,25 +856,28 @@ namespace MazeRunner
 			throw new NotImplementedException();
 		}
 
-		private bool CheckTunnel(int r, int c, List<string> directions, string whatToCheck)
+		private bool CheckTunnel(int r, int c, Dictionary<string, List<int[]>> validSchema)
 		{
-			if (whatToCheck == "Corridor")
+			foreach (var value in validSchema)
 			{
-				foreach(string direction in directions)
+				if (value.Key == "corridor")
 				{
-					if ((Tiles[r + Direction.DI[direction], c + Direction.DJ[direction]].Flags & Tile.CORRIDOR) != Tile.CORRIDOR)
+					foreach (var position in value.Value)
 					{
-						return false;
+						if ((Tiles[r + position[0], c + position[1]].Flags & Tile.CORRIDOR) != Tile.CORRIDOR)
+						{
+							return false;
+						}
 					}
 				}
-			}
-			if (whatToCheck == "Walled")
-			{
-				foreach(string direction in directions)
+				if (value.Key == "walled")
 				{
-					if ((Tiles[r + Direction.DI[direction], c + Direction.DJ[direction]].Flags & Tile.CORRIDOR) == Tile.OPENSPACE)
+					foreach (var position in value.Value)
 					{
-						return false;
+						if ((Tiles[r + position[0], c + position[1]].Flags & Tile.OPENSPACE) == Tile.OPENSPACE)
+						{
+							return false;
+						}
 					}
 				}
 			}
