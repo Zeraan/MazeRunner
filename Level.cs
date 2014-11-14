@@ -219,6 +219,7 @@ namespace MazeRunner
 		{
 			Random r = new Random();
 			Rooms = new Dictionary<int, Room>();
+			Stairs = new List<Stair>();
 			Width = r.Next(20,101);
 			Height = r.Next(20, 101);
 			MinRoomSize = 3;
@@ -651,7 +652,7 @@ namespace MazeRunner
 			{
 				return null;
 			}
-			if ((tile.Flags & Tile.BLOCK_DOOR) == Tile.BLOCK_DOOR)
+			if ((tile.Flags & Tile.BLOCK_DOOR) > 0)
 			{
 				return null;
 			}
@@ -820,7 +821,7 @@ namespace MazeRunner
 			{
 				for (int c = c1; c <= c2; c++)
 				{
-					if ((Tiles[r,c].Flags & Tile.BLOCK_CORR) == Tile.BLOCK_CORR)
+					if ((Tiles[r,c].Flags & Tile.BLOCK_CORR) > 0)
 					{
 						return false;
 					}
