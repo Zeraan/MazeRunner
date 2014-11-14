@@ -57,6 +57,12 @@ namespace MazeRunner
 
 	public static class Direction
 	{
+		public static List<string> Directions = new List<string> {
+			"north",
+			"south",
+			"west",
+			"east"
+		};
 		public static Dictionary<string, int> DI = new Dictionary<string,int> {
 			{ "north", -1 },
 			{ "south", 1 },
@@ -153,6 +159,14 @@ namespace MazeRunner
 		public string TypeName;
 		public uint RoomID;
 	}
+	public class Stair
+	{
+		public int Row;
+		public int Column;
+		public int RowNext;
+		public int ColumnNext;
+		public bool IsDownward;
+	}
 
 	public class Room
 	{
@@ -202,6 +216,7 @@ namespace MazeRunner
 	{
 		public Tile[,] Tiles;
 		public Dictionary<int, Room> Rooms;
+		public List<Stair> Stairs;
 		public int Width;
 		public int Height;
 		public int N_I;
@@ -235,6 +250,7 @@ namespace MazeRunner
 		{
 			Random r = new Random();
 			Rooms = new Dictionary<int, Room>();
+			Stairs = new List<Stair>();
 			Width = r.Next(20,101);
 			Height = r.Next(20, 101);
 			MinRoomSize = 3;
@@ -247,8 +263,8 @@ namespace MazeRunner
 			{
 				Height++; //Must be odd number
 			}
-			N_I = Width / 2;
-			N_J = Height / 2;
+			N_I = Height / 2;
+			N_J = Width / 2;
 			GenerateRandomLevel(levelNumber);
 			SetStartingPoint();
 		}
@@ -276,10 +292,10 @@ namespace MazeRunner
 
 		private void InitCells()
 		{
-			Tiles = new Tile[Width, Height];
-			for (int i = 0; i < Width; i++)
+			Tiles = new Tile[Height, Width];
+			for (int i = 0; i < Height; i++)
 			{
-				for (int j = 0; j < Height; j++)
+				for (int j = 0; j < Width; j++)
 				{
 					Tiles[i,j] = new Tile();
 					Tiles[i,j].Flags = Tile.NOTHING;
@@ -476,11 +492,11 @@ namespace MazeRunner
 			{
 				for (int c = column1; c <= column2; c++)
 				{
-					if ((Tiles[c,r].Flags & Tile.BLOCKED) == Tile.BLOCKED)
+					if ((Tiles[r,c].Flags & Tile.BLOCKED) == Tile.BLOCKED)
 					{
 						return false;
 					}
-					else if ((Tiles[c,r].Flags & Tile.ROOM) == Tile.ROOM)
+					else if ((Tiles[r,c].Flags & Tile.ROOM) == Tile.ROOM)
 					{
 						return false;
 					}
@@ -667,7 +683,7 @@ namespace MazeRunner
 			{
 				return null;
 			}
-			if ((tile.Flags & Tile.BLOCK_DOOR) == Tile.BLOCK_DOOR)
+			if ((tile.Flags & Tile.BLOCK_DOOR) > 0)
 			{
 				return null;
 			}
@@ -818,11 +834,11 @@ namespace MazeRunner
 
 		private bool SoundTunnel(int midRow, int midColumn, int nextRow, int nextColumn)
 		{
-			if (nextRow < 0 || nextRow > Height)
+			if (nextRow < 0 || nextRow >= Height)
 			{
 				return false;
 			}
-			if (nextColumn< 0 || nextColumn > Width)
+			if (nextColumn< 0 || nextColumn >= Width)
 			{
 				return false;
 			}
@@ -836,7 +852,7 @@ namespace MazeRunner
 			{
 				for (int c = c1; c <= c2; c++)
 				{
-					if ((Tiles[r,c].Flags & Tile.BLOCK_CORR) == Tile.BLOCK_CORR)
+					if ((Tiles[r,c].Flags & Tile.BLOCK_CORR) > 0)
 					{
 						return false;
 					}
@@ -847,12 +863,39 @@ namespace MazeRunner
 
 		private void PlaceStairs()
 		{
+			Random random = new Random();
+			int n = 2; //For now, we have an entry and exit stairs, so totalling of 2 stairs
+			var possibleStairs = StairEnds();
+			if (possibleStairs.Count == 0) //No valid locations
+			{
+				return;
+			}
+			for (int i = 0; i < n; i++)
+			{
+				var stair = possibleStairs[random.Next(possibleStairs.Count)];
+				possibleStairs.Remove(stair);
+				
+				int r = stair.Row;
+				int c = stair.Column;
+				int type = i < 2 ? i : random.Next(2);
 
+				if (type == 0)
+				{
+					Tiles[r,c].Flags |= Tile.STAIR_DN;
+					stair.IsDownward = true;
+				}
+				else
+				{
+					Tiles[r, c].Flags |= Tile.STAIR_UP;
+					stair.IsDownward = false;
+				}
+				Stairs.Add(stair);
+			}
 		}
 
-		private List<int[]> StairEnds()
+		private List<Stair> StairEnds()
 		{
-			List<int[]> locations = new List<int[]>();
+			List<Stair> possibleStairs = new List<Stair>();
 			for (int i = 0; i < N_I; i++)
 			{
 				int r = i * 2 + 1;
@@ -867,9 +910,23 @@ namespace MazeRunner
 					{
 						continue;
 					}
+					foreach (var direction in Direction.Directions)
+					{
+						if (CheckTunnel(r, c, StairData.StairEnd[direction]))
+						{
+							possibleStairs.Add(new Stair
+							{
+													 Row = r,
+													 Column = c,
+													 RowNext = r + StairData.StairEnd[direction]["next"][0][0],
+													 ColumnNext = c + StairData.StairEnd[direction]["next"][0][1]
+							});
+							break;
+						}
+					}
 				}
 			}
-			return locations;
+			return possibleStairs;
 		}
 
 		private void CleanDungeon()
@@ -884,7 +941,16 @@ namespace MazeRunner
 
 		private void EmptyBlocks()
 		{
-			throw new NotImplementedException();
+			for (int r = 0; r < Height; r++)
+			{
+				for (int c = 0; c < Width; c++)
+				{
+					if ((Tiles[r,c].Flags & Tile.BLOCKED) == Tile.BLOCKED)
+					{
+						Tiles[r,c].Flags = Tile.NOTHING;
+					}
+				}
+			}
 		}
 
 		private bool CheckTunnel(int r, int c, Dictionary<string, List<int[]>> validSchema)
