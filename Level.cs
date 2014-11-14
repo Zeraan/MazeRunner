@@ -107,6 +107,37 @@ namespace MazeRunner
 		};
 	}
 
+	public static class CloseData
+	{
+		public static Dictionary<string, Dictionary<string, List<int[]>>> CloseEnd = new Dictionary<string, Dictionary<string, List<int[]>>>
+		{
+			{ "north", new Dictionary<string, List<int[]>>{
+					 {"walled", new List<int[]>{new[]{0,-1},new[]{1,-1},new[]{1,0},new[]{1,1},new[]{0,1}}},
+					 {"close", new List<int[]>{new[]{0,0}}},
+					 {"recurse", new List<int[]>{new[]{-1,0}}},
+				}
+			},
+			{ "south", new Dictionary<string, List<int[]>>{
+					 {"walled", new List<int[]>{new[]{0,-1},new[]{-1,-1},new[]{-1,0},new[]{-1,1},new[]{0,1}}},
+					 {"close", new List<int[]>{new[]{0,0}}},
+					 {"recurse", new List<int[]>{new[]{1,0}}},
+				}
+			},
+			{ "west", new Dictionary<string, List<int[]>>{
+					 {"walled", new List<int[]>{new[]{-1,0},new[]{-1,1},new[]{0,1},new[]{1,1},new[]{1,0}}},
+					 {"close", new List<int[]>{new[]{0,0}}},
+					 {"recurse", new List<int[]>{new[]{0,-1}}},
+				}
+			},
+			{ "east", new Dictionary<string, List<int[]>>{
+					 {"walled", new List<int[]>{new[]{-1,0},new[]{-1,-1},new[]{0,-1},new[]{1,-1},new[]{1,0}}},
+					 {"close", new List<int[]>{new[]{0,0}}},
+					 {"recurse", new List<int[]>{new[]{0,1}}},
+				}
+			}
+		};
+	}
+
 	public static class CorridorLayout
 	{
 		public const int LABYRINTH = 0;
@@ -922,7 +953,37 @@ namespace MazeRunner
 
 		private void Collapse(int r, int c)
 		{
-			throw new NotImplementedException();
+			if ((Tiles[r,c].Flags & Tile.OPENSPACE) != Tile.OPENSPACE)
+			{
+				return;
+			}
+
+			var xc = CloseData.CloseEnd;
+			foreach(string direction in xc.Keys)
+			{
+				if (CheckTunnel(r, c, xc[direction]))
+				{
+					foreach(var pair in xc[direction]["close"])
+					{
+						Tiles[r + pair[0], c + pair[1]].Flags = Tile.NOTHING;
+					}
+
+					int[] somePair;
+					string theKey = "open";
+					if (xc[direction].ContainsKey(theKey))
+					{
+						somePair = xc[direction][theKey][0];
+						Tiles[r + somePair[0], c + somePair[1]].Flags |= Tile.CORRIDOR;
+					}
+
+					theKey = "recurse";
+					if (xc[direction].ContainsKey(theKey))
+					{
+						somePair = xc[direction][theKey][0];
+						Collapse(r + somePair[0], c + somePair[1]);
+					}
+				}
+			}
 		}
 
 		public int RemoveDeadEndsPercent { get; set; }
