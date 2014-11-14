@@ -734,7 +734,20 @@ namespace MazeRunner
 
 		private bool DelveTunnel(int thisRow, int thisColumn, int nextRow, int nextColumn)
 		{
-			throw new NotImplementedException();
+			int r1 = Math.Min(thisRow, nextRow);
+			int r2 = Math.Max(thisRow, nextRow);
+			int c1 = Math.Min(thisColumn, nextColumn);
+			int c2 = Math.Max(thisColumn, nextColumn);
+
+			for (int r = r1; r <= r2; r++)
+			{
+				for (int c = c1; c <= c2; c++)
+				{
+					Tiles[r, c].Flags &=~ Tile.ENTRANCE;
+					Tiles[r, c].Flags |= Tile.CORRIDOR;
+				}
+			}
+			return true;
 		}
 
 		private bool SoundTunnel(int midRow, int midColumn, int nextRow, int nextColumn)
