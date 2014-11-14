@@ -706,6 +706,27 @@ namespace MazeRunner
 
 		}
 
+		private List<int[]> StairEnds()
+		{
+			List<int[]> locations = new List<int[]>();
+			for (int i = 0; i < N_I; i++)
+			{
+				int r = i * 2 + 1;
+				for (int j = 0; j < N_J; j++)
+				{
+					int c = j * 2 + 1;
+					if (Tiles[r,c].Flags != Tile.CORRIDOR)
+					{
+						continue;
+					}
+					if ((Tiles[r,c].Flags & Tile.STAIRS) != 0)
+					{
+						continue;
+					}
+				}
+			}
+		}
+
 		private void CleanDungeon()
 		{
 
