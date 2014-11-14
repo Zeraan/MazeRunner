@@ -72,6 +72,13 @@ namespace MazeRunner
 		};
 	}
 
+	public static class CorridorLayout
+	{
+		public const int LABYRINTH = 0;
+		public const int BENT = 50;
+		public const int STRAIGHT = 100;
+	}
+
 	public class Door
 	{
 		public int Row;
@@ -151,6 +158,7 @@ namespace MazeRunner
 			}
 		}
 
+		public int? CorridorLayout { get; set; }
 		public string RoomLayout { get; set; }
 		public int RoomCount { get; set; }
 		public Point StartingPoint { get; set; }
@@ -693,7 +701,16 @@ namespace MazeRunner
 
 		private string[] TunnelDirections(string lastDirection)
 		{
-			throw new NotImplementedException();
+			var directionKeysCopy = new List<string>(Direction.DJ.Keys.ToList<string>());
+			if (!string.IsNullOrEmpty(lastDirection) && CorridorLayout != null)
+			{
+				Random random = new Random();
+				if (random.Next(MazeRunner.CorridorLayout.STRAIGHT) < CorridorLayout)
+				{
+					directionKeysCopy.Remove(lastDirection);
+				}
+			}
+			return directionKeysCopy.ToArray();
 		}
 
 		private bool OpenTunnel(int i, int j, string dir)
