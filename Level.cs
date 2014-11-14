@@ -57,6 +57,12 @@ namespace MazeRunner
 
 	public static class Direction
 	{
+		public static List<string> Directions = new List<string> {
+			"north",
+			"south",
+			"west",
+			"east"
+		};
 		public static Dictionary<string, int> DI = new Dictionary<string,int> {
 			{ "north", -1 },
 			{ "south", 1 },
@@ -121,6 +127,13 @@ namespace MazeRunner
 		public DoorType Type;
 		public string TypeName;
 		public uint RoomID;
+	}
+	public class Stair
+	{
+		public int Row;
+		public int Column;
+		public int RowNext;
+		public int ColumnNext;
 	}
 
 	public class Room
@@ -819,9 +832,9 @@ namespace MazeRunner
 
 		}
 
-		private List<int[]> StairEnds()
+		private List<Stair> StairEnds()
 		{
-			List<int[]> locations = new List<int[]>();
+			List<Stair> possibleStairs = new List<Stair>();
 			for (int i = 0; i < N_I; i++)
 			{
 				int r = i * 2 + 1;
@@ -836,9 +849,23 @@ namespace MazeRunner
 					{
 						continue;
 					}
+					foreach (var direction in Direction.Directions)
+					{
+						if (CheckTunnel(r, c, StairData.StairEnd[direction]))
+						{
+							possibleStairs.Add(new Stair
+							{
+													 Row = r,
+													 Column = c,
+													 RowNext = r + StairData.StairEnd[direction]["next"][0][0],
+													 ColumnNext = c + StairData.StairEnd[direction]["next"][0][1]
+							});
+							break;
+						}
+					}
 				}
 			}
-			return locations;
+			return possibleStairs;
 		}
 
 		private void CleanDungeon()
