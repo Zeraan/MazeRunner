@@ -17,7 +17,6 @@ namespace MazeRunner
 		public const uint CORRIDOR		= 0x00000004;
 		public const uint PERIMETER		= 0x00000010;
 		public const uint ENTRANCE		= 0x00000020;
-		public const uint ROOM_ID		= 0x0000FFC0;
 		public const uint ARCH			= 0x00010000;
 		public const uint DOOR			= 0x00020000;
 		public const uint LOCKED		= 0x00040000;
@@ -46,6 +45,7 @@ namespace MazeRunner
 		public int Column { get; set; }
 		public int Width { get; set; }
 		public int Height { get; set; }
+		public int Room_ID { get; set; }
 		
 		//TODO: Add items
 		//public List<Item> ItemsOnFloor { get; private set; }
@@ -65,7 +65,7 @@ namespace MazeRunner
 
 	public class Room
 	{
-		public uint ID;
+		public int ID;
 		public int Row;
 		public int Column;
 		public int North;
@@ -87,7 +87,7 @@ namespace MazeRunner
 		public int RDir;
 		public int Door_R;
 		public int Door_C;
-		public uint Out_ID;
+		public int Out_ID;
 	}
 
 	public static class ExtensionMethods
@@ -110,7 +110,7 @@ namespace MazeRunner
 	public class Level
 	{
 		public Tile[,] Tiles;
-		public Dictionary<uint, Room> Rooms;
+		public Dictionary<int, Room> Rooms;
 		public int Width;
 		public int Height;
 		public int N_I;
@@ -119,7 +119,8 @@ namespace MazeRunner
 		public int MaxRoomSize { get; set; }
 		public int RoomBase { get { return (MinRoomSize + 1) / 2; } }
 		public int RoomRadix { get { return ((MaxRoomSize - MinRoomSize) / 2) + 1; } }
-		public uint N_Rooms { get; set; }
+		public int N_Rooms { get; set; }
+		public int LastRoomID { get; set; }
 		public const int MAX_ROOMS = 9;
 
 		public int AllocRooms
@@ -141,7 +142,7 @@ namespace MazeRunner
 		public Level(int levelNumber)
 		{
 			Random r = new Random();
-			Rooms = new Dictionary<uint, Room>();
+			Rooms = new Dictionary<int, Room>();
 			Width = r.Next(20,101);
 			Height = r.Next(20, 101);
 			MinRoomSize = 3;
@@ -267,7 +268,7 @@ namespace MazeRunner
 				return;
 			}
 
-			uint roomID = N_Rooms + 1;
+			int roomID = N_Rooms + 1;
 			N_Rooms = roomID;
 			LastRoomID = roomID;
 
@@ -284,7 +285,8 @@ namespace MazeRunner
 					{
 						Tiles[r,c].Flags &= ~Tile.PERIMETER;
 					}
-					Tiles[r,c].Flags |= Tile.ROOM | roomID << 6;
+					Tiles[r,c].Flags |= Tile.ROOM;
+					Tiles[r,c].Room_ID = roomID;
 				}
 			}
 			Room room = new Room 
@@ -437,8 +439,11 @@ namespace MazeRunner
 				{
 					break;
 				}
-				uint out_id;
+				int out_id = aSill.Out_ID;
+				if (out_id > 0)
+				{
 
+				}
 				/*my $out_id; if ($out_id = $sill->{'out_id'}) {
       my $connect = join(',',(sort($room->{'id'},$out_id)));
       redo if ($dungeon->{'connect'}{$connect}++);
@@ -583,10 +588,10 @@ namespace MazeRunner
 			{
 				return null;
 			}
-			uint out_id = 0;
+			int out_id = 0;
 			if ((outTile.Flags & Tile.ROOM) == Tile.ROOM)
 			{
-				out_id = (outTile.Flags & Tile.ROOM_ID) >> 6;
+				out_id = outTile.Room_ID;
 			}
 			if (out_id == room.ID)
 			{
@@ -651,8 +656,6 @@ namespace MazeRunner
 		{
 
 		}
-
-		public uint LastRoomID { get; set; }
 	}
 
 	public class LevelManager
