@@ -743,7 +743,7 @@ namespace MazeRunner
 			{
 				for (int c = c1; c <= c2; c++)
 				{
-					Tiles[r, c].Flags &=~ Tile.ENTRANCE;
+					Tiles[r, c].Flags &= ~Tile.ENTRANCE;
 					Tiles[r, c].Flags |= Tile.CORRIDOR;
 				}
 			}
@@ -808,6 +808,31 @@ namespace MazeRunner
 		private void CleanDungeon()
 		{
 
+		}
+
+		private bool CheckTunnel(int r, int c, List<string> directions, string whatToCheck)
+		{
+			if (whatToCheck == "Corridor")
+			{
+				foreach(string direction in directions)
+				{
+					if ((Tiles[r + Direction.DI[direction], c + Direction.DJ[direction]].Flags & Tile.CORRIDOR) != Tile.CORRIDOR)
+					{
+						return false;
+					}
+				}
+			}
+			if (whatToCheck == "Walled")
+			{
+				foreach(string direction in directions)
+				{
+					if ((Tiles[r + Direction.DI[direction], c + Direction.DJ[direction]].Flags & Tile.CORRIDOR) == Tile.OPENSPACE)
+					{
+						return false;
+					}
+				}
+			}
+			return true;
 		}
 	}
 
