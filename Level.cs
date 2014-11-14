@@ -909,7 +909,16 @@ namespace MazeRunner
 
 		private void EmptyBlocks()
 		{
-			throw new NotImplementedException();
+			for (int r = 0; r < Height; r++)
+			{
+				for (int c = 0; c < Width; c++)
+				{
+					if ((Tiles[r,c].Flags & Tile.BLOCKED) == Tile.BLOCKED)
+					{
+						Tiles[r,c].Flags = Tile.NOTHING;
+					}
+				}
+			}
 		}
 
 		private bool CheckTunnel(int r, int c, Dictionary<string, List<int[]>> validSchema)
