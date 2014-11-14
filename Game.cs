@@ -120,7 +120,7 @@ namespace MazeRunner
 			{
 				for (int y = (int)startPoint.Y; y <= endPoint.Y; y++)
 				{
-					if (x < 0 || x >= CurrentLevel.Width || y < 0 || y >= CurrentLevel.Height)
+					if (x < 0 || x >= CurrentLevel.Height || y < 0 || y >= CurrentLevel.Width)
 						VisibleTiles.Add(new Tile() { Flags = Tile.BLOCKED });
 					else VisibleTiles.Add(CurrentLevel.Tiles[x, y]);
 				}
