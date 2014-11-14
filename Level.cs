@@ -914,13 +914,13 @@ namespace MazeRunner
 					Random random = new Random();
 					if (all || random.Next(100) < RemoveDeadEndsPercent)
 					{
-						CollapseTunnels(r, c);
+						Collapse(r, c);
 					}
 				}
 			}
 		}
 
-		private void CollapseTunnels(int r, int c)
+		private void Collapse(int r, int c)
 		{
 			throw new NotImplementedException();
 		}
