@@ -147,7 +147,7 @@ namespace MazeRunner
 		public int N_Rooms { get; set; }
 		public int LastRoomID { get; set; }
 		public const int MAX_ROOMS = 9;
-
+		
 		public int AllocRooms
 		{
 			get
@@ -752,7 +752,31 @@ namespace MazeRunner
 
 		private bool SoundTunnel(int midRow, int midColumn, int nextRow, int nextColumn)
 		{
-			throw new NotImplementedException();
+			if (nextRow < 0 || nextRow > Height)
+			{
+				return false;
+			}
+			if (nextColumn< 0 || nextColumn > Width)
+			{
+				return false;
+			}
+
+			int r1 = Math.Min(midRow, nextRow);
+			int r2 = Math.Max(midRow, nextRow);
+			int c1 = Math.Min(midColumn, nextColumn);
+			int c2 = Math.Max(midColumn, nextColumn);
+
+			for (int r = r1; r <= r2; r++)
+			{
+				for (int c = c1; c <= c2; c++)
+				{
+					if ((Tiles[r,c].Flags & Tile.BLOCK_CORR) == Tile.BLOCK_CORR)
+					{
+						return false;
+					}
+				}
+			}
+				return true;
 		}
 
 		private void PlaceStairs()
