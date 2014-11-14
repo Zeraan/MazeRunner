@@ -232,8 +232,8 @@ namespace MazeRunner
 			{
 				Height++; //Must be odd number
 			}
-			N_I = Width / 2;
-			N_J = Height / 2;
+			N_I = Height / 2;
+			N_J = Width / 2;
 			GenerateRandomLevel(levelNumber);
 			SetStartingPoint();
 		}
@@ -261,10 +261,10 @@ namespace MazeRunner
 
 		private void InitCells()
 		{
-			Tiles = new Tile[Width, Height];
-			for (int i = 0; i < Width; i++)
+			Tiles = new Tile[Height, Width];
+			for (int i = 0; i < Height; i++)
 			{
-				for (int j = 0; j < Height; j++)
+				for (int j = 0; j < Width; j++)
 				{
 					Tiles[i,j] = new Tile();
 					Tiles[i,j].Flags = Tile.NOTHING;
@@ -461,11 +461,11 @@ namespace MazeRunner
 			{
 				for (int c = column1; c <= column2; c++)
 				{
-					if ((Tiles[c,r].Flags & Tile.BLOCKED) == Tile.BLOCKED)
+					if ((Tiles[r,c].Flags & Tile.BLOCKED) == Tile.BLOCKED)
 					{
 						return false;
 					}
-					else if ((Tiles[c,r].Flags & Tile.ROOM) == Tile.ROOM)
+					else if ((Tiles[r,c].Flags & Tile.ROOM) == Tile.ROOM)
 					{
 						return false;
 					}
@@ -803,11 +803,11 @@ namespace MazeRunner
 
 		private bool SoundTunnel(int midRow, int midColumn, int nextRow, int nextColumn)
 		{
-			if (nextRow < 0 || nextRow > Height)
+			if (nextRow < 0 || nextRow >= Height)
 			{
 				return false;
 			}
-			if (nextColumn< 0 || nextColumn > Width)
+			if (nextColumn< 0 || nextColumn >= Width)
 			{
 				return false;
 			}
