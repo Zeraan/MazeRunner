@@ -843,7 +843,7 @@ namespace MazeRunner
 
 		private void CleanDungeon()
 		{
-			if (IsRemoveDeadEnds)
+			if (RemoveDeadEndsPercent > 0)
 			{
 				RemoveDeadEnds();
 			}
@@ -891,10 +891,41 @@ namespace MazeRunner
 
 		private void RemoveDeadEnds()
 		{
+			CollapseTunnels();
+		}
+
+		private void CollapseTunnels()
+		{
+			bool all = RemoveDeadEndsPercent == 100;
+			for (int i = 0; i < N_I; i++)
+			{
+				int r = (i * 2) + 1;
+				for (int j = 0; j < N_J; j++)
+				{
+					int c = (j * 2) + 1;
+					if ((Tiles[r,c].Flags & Tile.OPENSPACE) != Tile.OPENSPACE)
+					{
+						continue;
+					}
+					if ((Tiles[r,c].Flags & Tile.STAIRS) == Tile.STAIRS)
+					{
+						continue;
+					}
+					Random random = new Random();
+					if (all || random.Next(100) < RemoveDeadEndsPercent)
+					{
+						CollapseTunnels(r, c);
+					}
+				}
+			}
+		}
+
+		private void CollapseTunnels(int r, int c)
+		{
 			throw new NotImplementedException();
 		}
 
-		public bool IsRemoveDeadEnds { get; set; }
+		public int RemoveDeadEndsPercent { get; set; }
 	}
 
 	public class LevelManager
