@@ -715,6 +715,30 @@ namespace MazeRunner
 
 		private bool OpenTunnel(int i, int j, string dir)
 		{
+			int thisRow = (i * 2) + 1;
+			int thisColumn = (j * 2) + 1;
+			int nextRow = ((i + Direction.DI[dir]) * 2) + 1;
+			int nextColumn = ((j + Direction.DJ[dir] * 2)) + 1;
+			int midRow = (thisRow + nextRow) / 2;
+			int midColumn = (thisColumn + nextColumn) / 2;
+
+			if (SoundTunnel(midRow, midColumn, nextRow, nextColumn))
+			{
+				return DelveTunnel(thisRow, thisColumn, nextRow, nextColumn);
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		private bool DelveTunnel(int thisRow, int thisColumn, int nextRow, int nextColumn)
+		{
+			throw new NotImplementedException();
+		}
+
+		private bool SoundTunnel(int midRow, int midColumn, int nextRow, int nextColumn)
+		{
 			throw new NotImplementedException();
 		}
 
