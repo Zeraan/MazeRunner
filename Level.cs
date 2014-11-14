@@ -803,11 +803,22 @@ namespace MazeRunner
 					}
 				}
 			}
+			return locations;
 		}
 
 		private void CleanDungeon()
 		{
+			if (IsRemoveDeadEnds)
+			{
+				RemoveDeadEnds();
+			}
+			FixDoors();
+			EmptyBlocks();
+		}
 
+		private void EmptyBlocks()
+		{
+			throw new NotImplementedException();
 		}
 
 		private bool CheckTunnel(int r, int c, List<string> directions, string whatToCheck)
@@ -834,6 +845,18 @@ namespace MazeRunner
 			}
 			return true;
 		}
+
+		private void FixDoors()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void RemoveDeadEnds()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool IsRemoveDeadEnds { get; set; }
 	}
 
 	public class LevelManager
