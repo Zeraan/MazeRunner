@@ -239,6 +239,8 @@ namespace MazeRunner
 			}
 		}
 
+		public List<Door> Doors { get; set; }
+
 		public int? CorridorLayout { get; set; }
 		public string RoomLayout { get; set; }
 		public int RoomCount { get; set; }
@@ -983,7 +985,32 @@ namespace MazeRunner
 
 		private void FixDoors()
 		{
-			//throw new NotImplementedException();
+			foreach (Room room in Rooms.Values)
+			{
+				List<Door> shiny = new List<Door>();
+				foreach (Door door in room.Doors)
+				{
+					int doorR = door.Row;
+					int doorC = door.Column;
+					Tile doorTile = Tiles[doorR, doorC];
+					if ((doorTile.Flags & Tile.OPENSPACE) != Tile.OPENSPACE)
+					{
+						continue;
+					}
+
+					shiny.Add(door);
+				}
+
+				if (shiny.Count > 0)
+				{
+					room.Doors = shiny.ToList<Door>();
+					Doors.AddRange(shiny);
+				}
+				else
+				{
+					room.Doors.Clear();
+				}
+			}
 		}
 
 		private void RemoveDeadEnds()
