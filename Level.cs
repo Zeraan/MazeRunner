@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace MazeRunner
 {
-	public enum DoorType { ARCH, DOOR, LOCKED, TRAPPED, SECRET, PORTC }
+	public enum DoorType { ARCH, DOOR, LOCKED/*, TRAPPED, SECRET, PORTC*/ }
 	//public enum TileType { Nothing, Blocked, Room, Corridor, Perimeter, Entrance, Arch, Door, Locked, Trapped, Secret, Portc, StairsDown, StairsUp, OutOfBounds }
 	public class Tile
 	{
@@ -20,15 +20,15 @@ namespace MazeRunner
 		public const uint ARCH			= 0x00010000;
 		public const uint DOOR			= 0x00020000;
 		public const uint LOCKED		= 0x00040000;
-		public const uint TRAPPED		= 0x00080000;
+		/*public const uint TRAPPED		= 0x00080000;
 		public const uint SECRET		= 0x00100000;
-		public const uint PORTC			= 0x00200000;
+		public const uint PORTC			= 0x00200000;*/
 		public const uint STAIR_DN		= 0x00400000;
 		public const uint STAIR_UP		= 0x00800000;
 		public const uint LABEL			= 0xFF000000;
 
 		public const uint OPENSPACE		= ROOM | CORRIDOR;
-		public const uint DOORSPACE		= ARCH | DOOR | LOCKED | TRAPPED | SECRET | PORTC;
+		public const uint DOORSPACE		= ARCH | DOOR | LOCKED; //| TRAPPED | SECRET | PORTC;
 		public const uint ESPACE		= ENTRANCE | DOORSPACE | 0xFF000000;
 		public const uint STAIRS		= STAIR_DN | STAIR_UP;
 
@@ -593,7 +593,7 @@ namespace MazeRunner
 						Tiles[door_R,door_C].Flags |= Tile.LOCKED;
 						door.TypeName = "Locked Door";
 						break;
-					case MazeRunner.DoorType.TRAPPED:
+					/*case MazeRunner.DoorType.TRAPPED:
 						Tiles[door_R,door_C].Flags |= Tile.TRAPPED;
 						door.TypeName = "Trapped Door";
 						break;
@@ -604,7 +604,7 @@ namespace MazeRunner
 					case MazeRunner.DoorType.PORTC:
 						Tiles[door_R,door_C].Flags |= Tile.PORTC;
 						door.TypeName = "Portcullis";
-						break;
+						break;*/
 				}
 				//$door->{'out_id'} = $out_id if ($out_id);
 				room.Doors.Add(door);
@@ -721,7 +721,7 @@ namespace MazeRunner
 		{
 			Random r = new Random();
 
-			var value = r.Next(110);
+			var value = r.Next(75);
 			if (value < 15)
 			{
 				return MazeRunner.DoorType.ARCH;
@@ -730,11 +730,11 @@ namespace MazeRunner
 			{
 				return MazeRunner.DoorType.DOOR;
 			}
-			if (value < 75)
+			//if (value < 75)
 			{
 				return MazeRunner.DoorType.LOCKED;
 			}
-			if (value < 90)
+			/*if (value < 90)
 			{
 				return MazeRunner.DoorType.TRAPPED;
 			}
@@ -742,7 +742,7 @@ namespace MazeRunner
 			{
 				return MazeRunner.DoorType.SECRET;
 			}
-			return MazeRunner.DoorType.PORTC;
+			return MazeRunner.DoorType.PORTC;*/
 		}
 
 		private void LabelRooms()
@@ -983,7 +983,7 @@ namespace MazeRunner
 
 		private void FixDoors()
 		{
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 		}
 
 		private void RemoveDeadEnds()
