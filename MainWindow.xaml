@@ -7,18 +7,22 @@
     <Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="50"/>
+			<RowDefinition Height="*"/>
 			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
 			<ColumnDefinition Width="Auto"/>
 		</Grid.ColumnDefinitions>
-		<mazeRunner:MazeControl Grid.Row="1" Margin="5,0,0,0" TileSize="50" NumVerticalTiles="{Binding NumMapVerticalTilesVisible}" NumHorizontalTiles="{Binding NumMapHorizontalTilesVisible}"/>
-		
-		<!-- Health / Mana display -->
-		<Grid Grid.Row="2" Grid.Column="0" Margin="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="20">
+        <!--<mazeRunner:MazeControl Grid.Row="1" Margin="5,0,0,0" TileSize="50" NumVerticalTiles="{Binding NumMapVerticalTilesVisible}" NumHorizontalTiles="{Binding NumMapHorizontalTilesVisible}"/>-->
+        <mazeRunner:MazeCanvas x:Name="MazeCanvas" Grid.Row="1" />
+        <ScrollBar x:Name="horizontalScrollbar" Grid.Row="2" Orientation="Horizontal" Height="36" Scroll="horizontalScrollbar_Scroll"/>
+        <ScrollBar x:Name="verticalScrollbar" Grid.Row="1" Grid.Column="1" Width="36" HorizontalAlignment="Left" Scroll="verticalScrollbar_Scroll"/>
+        <!-- Health / Mana display -->
+		<Grid Grid.Row="3" Grid.Column="0" Margin="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="20">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="5*"/>
 				<ColumnDefinition Width="5*"/>
@@ -27,7 +31,7 @@
 			<mazeRunner:CustomBar Grid.Column="1" Maximum="100" Minimum="0" Value="50" BarColor="DarkBlue" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 		</Grid>
 		
-		<Border BorderBrush="Black" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="1" Margin="5"></Border>
+		<Border BorderBrush="Black" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="1" Margin="5"></Border>
 		<ScrollViewer Grid.Row="3" Height="150" Grid.Column="0" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto">
 			<TextBlock Text="{Binding LogText}"/>
 		</ScrollViewer>

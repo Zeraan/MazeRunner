@@ -25,6 +25,21 @@ namespace MazeRunner
 			InitializeComponent();
 			Game game = new Game();
 			DataContext = game;
+			MazeCanvas.Level = game.CurrentLevel;
+			horizontalScrollbar.Maximum = MazeCanvas.Level.Width - 17;
+			verticalScrollbar.Maximum = MazeCanvas.Level.Height - 17;
+		}
+
+		private void horizontalScrollbar_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+		{
+			MazeCanvas.Left = (int)e.NewValue;
+			MazeCanvas.InvalidateVisual();
+		}
+
+		private void verticalScrollbar_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+		{
+			MazeCanvas.Top = (int)e.NewValue;
+			MazeCanvas.InvalidateVisual();
 		}
 	}
 }

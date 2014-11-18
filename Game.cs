@@ -23,7 +23,7 @@ namespace MazeRunner
 		public int NumMiniMapHorizontalTilesVisible { get { return 21; } }
 		public int NumMiniMapVerticalTilesVisible { get { return 21; } }
 
-		public List<Level> Levels { get; set; }
+		public LevelManager LevelManager { get; set; }
 
 		public Point PlayerPosition { get; set; }
 
@@ -68,19 +68,17 @@ namespace MazeRunner
 
 		private void InitLevel()
 		{
-			if (Levels == null)
+			if (LevelManager == null)
 			{
-				Levels = new List<Level>();
-				Level firstLevel = new Level(1);
-				Levels.Add(firstLevel);
-				CurrentLevel = firstLevel;
+				LevelManager = new LevelManager();
+				CurrentLevel = LevelManager.Levels[0];
 			}
 		}
 
 		public void TraverseLevel(int level)
 		{
 			// Only accept valid levels
-			if (level <= 0 || level > Levels.Count + 1) return;
+			/*if (level <= 0 || level > Levels.Count + 1) return;
 
 			if (Levels.Count == Levels.Count + 1)
 			{
@@ -90,7 +88,7 @@ namespace MazeRunner
 			else
 			{
 				CurrentLevel = Levels[level];
-			}
+			}*/
 		}
 
 		public void UpdateGameTiles()

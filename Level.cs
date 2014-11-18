@@ -8,7 +8,7 @@ using System.Windows;
 namespace MazeRunner
 {
 	public enum DoorType { ARCH, DOOR, LOCKED/*, TRAPPED, SECRET, PORTC*/ }
-	//public enum TileType { Nothing, Blocked, Room, Corridor, Perimeter, Entrance, Arch, Door, Locked, Trapped, Secret, Portc, StairsDown, StairsUp, OutOfBounds }
+	public enum TileType { FLOOR, WALL, OPEN_DOOR, DOOR, LOCKED_DOOR, STAIRS_DOWN, STAIRS_UP }
 	public class Tile
 	{
 		public const uint NOTHING		= 0x00000000;
@@ -38,7 +38,7 @@ namespace MazeRunner
 
 		public uint Flags;
 
-		//public TileType TileType { get; set; }
+		public TileType TileType { get; set; }
 		public bool Opened { get; set; } //For use with doors
 		public bool Unlocked { get; set; }
 		public int Row { get; set; }
@@ -247,10 +247,11 @@ namespace MazeRunner
 		public Point StartingPoint { get; set; }
 		// TODO: Add list of entities and items on floor to level 
 
+		private Random r;
 
 		public Level(int levelNumber)
 		{
-			Random r = new Random();
+			r = new Random();
 			Rooms = new Dictionary<int, Room>();
 			Stairs = new List<Stair>();
 			Width = r.Next(20,101);
@@ -273,7 +274,6 @@ namespace MazeRunner
 
 		public void SetStartingPoint()
 		{
-			Random r = new Random();
 			// TODO: when placing player, check to make sure location is a valid position without monsters close by
 			int x = r.Next(0, Width - 1);
 			int y = r.Next(0, Height - 1);
@@ -283,13 +283,15 @@ namespace MazeRunner
 
 		private void GenerateRandomLevel(int levelNumber)
 		{
+			//RoomLayout = "Packed";
 			InitCells();
 			PlaceRooms();
 			OpenRooms();
 			LabelRooms();
-			Corridors();
+			/*Corridors();
 			PlaceStairs();
-			CleanDungeon();
+			CleanDungeon();*/
+			ConvertTiles(); //Just sets the enum value for simplicity
 		}
 
 		private void InitCells()
@@ -329,7 +331,6 @@ namespace MazeRunner
 
 		private void PackRooms()
 		{
-			Random random = new Random();
 			for (int i = 0; i < N_I;  ++i)
 			{
 				int rowNumber = i * 2 + 1;
@@ -340,7 +341,7 @@ namespace MazeRunner
 					{
 						continue;
 					}
-					if ((i == 0 || j == 0) && random.Next(2) > 0)
+					if ((i == 0 || j == 0) && r.Next(2) > 0)
 					{
 						continue;
 					}
@@ -440,7 +441,6 @@ namespace MazeRunner
 
 		private void SetRoom(ref int i, ref int j, ref int width, ref int height)
 		{
-			var random = new Random();
 			var roomBase = RoomBase;
 			var radix = RoomRadix;
 
@@ -454,11 +454,11 @@ namespace MazeRunner
 						a = 0;
 					}
 					var r = a < radix ? a : radix;
-					height = random.Next(r) + roomBase;
+					height = this.r.Next(r) + roomBase;
 				}
 				else
 				{
-					height = random.Next(radix) + roomBase;
+					height = r.Next(radix) + roomBase;
 				}
 			}
 			if (width == 0)
@@ -471,20 +471,20 @@ namespace MazeRunner
 						a = 0;
 					}
 					var r = a < radix ? a : radix;
-					width = random.Next(r) + roomBase;
+					width = this.r.Next(r) + roomBase;
 				}
 				else
 				{
-					width = random.Next(radix) + roomBase;
+					width = r.Next(radix) + roomBase;
 				}
 			}
 			if (i == -1)
 			{
-				i = random.Next(N_I - height);
+				i = r.Next(N_I - height);
 			}
 			if (j == -1)
 			{
-				j = random.Next(N_J - width);
+				j = r.Next(N_J - width);
 			}
 		}
 
@@ -525,7 +525,6 @@ namespace MazeRunner
 				return;
 			}
 			int n_opens = AllocOpens(room);
-			Random random = new Random();
 			Tile doorTile = new Tile() { Row = -1, Column = -1 };
 			Sill aSill = null;
 			for (int i = 0; i < n_opens; i++)
@@ -539,7 +538,7 @@ namespace MazeRunner
 						aSill = null;
 						break;
 					}
-					aSill = doorSills[random.Next(doorSills.Count)];
+					aSill = doorSills[r.Next(doorSills.Count)];
 					doorSills.Remove(aSill);
 					door_R = aSill.Door_R;
 					door_C = aSill.Door_C;
@@ -619,8 +618,7 @@ namespace MazeRunner
 			var room_w = (room.East - room.West) / 2 + 1;
 			var flumph = (int)Math.Sqrt(room_w * room_h);
 			
-			var random = new Random();
-			return flumph + random.Next(flumph);
+			return flumph + r.Next(flumph);
 		}
 
 		//List available sills (doorways?)
@@ -719,10 +717,8 @@ namespace MazeRunner
 			};
 		}
 
-		private static DoorType DoorType()
+		private DoorType DoorType()
 		{
-			Random r = new Random();
-
 			var value = r.Next(75);
 			if (value < 15)
 			{
@@ -788,8 +784,7 @@ namespace MazeRunner
 			var directionKeysCopy = new List<string>(Direction.DJ.Keys.ToList<string>());
 			if (!string.IsNullOrEmpty(lastDirection) && CorridorLayout != null)
 			{
-				Random random = new Random();
-				if (random.Next(MazeRunner.CorridorLayout.STRAIGHT) < CorridorLayout)
+				if (r.Next(MazeRunner.CorridorLayout.STRAIGHT) < CorridorLayout)
 				{
 					directionKeysCopy.Remove(lastDirection);
 				}
@@ -827,6 +822,10 @@ namespace MazeRunner
 			{
 				for (int c = c1; c <= c2; c++)
 				{
+					if (c >= Width || r >= Height)
+					{
+						continue;
+					}
 					Tiles[r, c].Flags &= ~Tile.ENTRANCE;
 					Tiles[r, c].Flags |= Tile.CORRIDOR;
 				}
@@ -865,7 +864,6 @@ namespace MazeRunner
 
 		private void PlaceStairs()
 		{
-			Random random = new Random();
 			int n = 2; //For now, we have an entry and exit stairs, so totalling of 2 stairs
 			var possibleStairs = StairEnds();
 			if (possibleStairs.Count == 0) //No valid locations
@@ -874,12 +872,12 @@ namespace MazeRunner
 			}
 			for (int i = 0; i < n; i++)
 			{
-				var stair = possibleStairs[random.Next(possibleStairs.Count)];
+				var stair = possibleStairs[this.r.Next(possibleStairs.Count)];
 				possibleStairs.Remove(stair);
 				
 				int r = stair.Row;
 				int c = stair.Column;
-				int type = i < 2 ? i : random.Next(2);
+				int type = i < 2 ? i : this.r.Next(2);
 
 				if (type == 0)
 				{
@@ -1035,8 +1033,7 @@ namespace MazeRunner
 					{
 						continue;
 					}
-					Random random = new Random();
-					if (all || random.Next(100) < RemoveDeadEndsPercent)
+					if (all || this.r.Next(100) < RemoveDeadEndsPercent)
 					{
 						Collapse(r, c);
 					}
@@ -1074,6 +1071,49 @@ namespace MazeRunner
 					{
 						somePair = xc[direction][theKey][0];
 						Collapse(r + somePair[0], c + somePair[1]);
+					}
+				}
+			}
+		}
+
+		private void ConvertTiles()
+		{
+			for (int i = 0; i < Height; i++)
+			{
+				for (int j = 0; j < Width; j++)
+				{
+					var tile = Tiles[i,j];
+					if ((tile.Flags & Tile.BLOCK_CORR) > 0)
+					{
+						tile.TileType = TileType.WALL;
+					}
+					else if ((tile.Flags & Tile.OPENSPACE) > 0)
+					{
+						tile.TileType = TileType.FLOOR;
+					}
+					else if ((tile.Flags & Tile.ARCH) == Tile.ARCH)
+					{
+						tile.TileType = TileType.OPEN_DOOR;
+					}
+					else if ((tile.Flags & Tile.DOOR) == Tile.DOOR)
+					{
+						tile.TileType = TileType.DOOR;
+					}
+					else if ((tile.Flags & Tile.LOCKED) == Tile.LOCKED)
+					{
+						tile.TileType = TileType.LOCKED_DOOR;
+					}
+					else if ((tile.Flags & Tile.STAIR_UP) == Tile.STAIR_UP)
+					{
+						tile.TileType = TileType.STAIRS_UP;
+					}
+					else if ((tile.Flags & Tile.STAIR_DN) == Tile.STAIR_DN)
+					{
+						tile.TileType = TileType.STAIRS_DOWN;
+					}
+					else
+					{
+						tile.TileType = TileType.WALL; //Just fill it up with wall
 					}
 				}
 			}
