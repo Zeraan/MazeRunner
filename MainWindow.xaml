@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mazeRunner="clr-namespace:MazeRunner"
 		x:Name="_mazeRunnerWindow"
-        Title="MainWindow" SizeToContent="WidthAndHeight" SizeChanged="_mazeRunnerWindow_SizeChanged" >
+        Title="MainWindow" SizeToContent="WidthAndHeight" SizeChanged="_mazeRunnerWindow_SizeChanged" MinHeight="800" MinWidth="800" >
     <Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="50"/>
@@ -19,8 +19,16 @@
 		</Grid.ColumnDefinitions>
         <!--<mazeRunner:MazeControl Grid.Row="1" Margin="5,0,0,0" TileSize="50" NumVerticalTiles="{Binding NumMapVerticalTilesVisible}" NumHorizontalTiles="{Binding NumMapHorizontalTilesVisible}"/>-->
         <mazeRunner:MazeCanvas x:Name="MazeCanvas" Grid.Row="1" />
-        <ScrollBar x:Name="horizontalScrollbar" Grid.Row="2" Orientation="Horizontal" Height="36" Scroll="horizontalScrollbar_Scroll"/>
-        <ScrollBar x:Name="verticalScrollbar" Grid.Row="1" Grid.Column="1" Width="36" HorizontalAlignment="Left" Scroll="verticalScrollbar_Scroll"/>
+        <Slider x:Name="horizontalScrollbar" Grid.Row="2" Orientation="Horizontal" IsSnapToTickEnabled="True" ValueChanged="horizontalScrollbar_ValueChanged" IsMoveToPointEnabled="True" >
+            <Slider.LayoutTransform>
+                <ScaleTransform ScaleY="2" ScaleX="3" CenterX="15" CenterY="15" />
+            </Slider.LayoutTransform>
+        </Slider>
+        <Slider x:Name="verticalScrollbar" Grid.Row="1" Orientation="Vertical" Grid.Column="1" HorizontalAlignment="Left" IsSnapToTickEnabled="True" ValueChanged="verticalScrollbar_ValueChanged" IsMoveToPointEnabled="True" >
+            <Slider.LayoutTransform>
+                <ScaleTransform ScaleY="3" ScaleX="2" CenterX="15" CenterY="15" />
+            </Slider.LayoutTransform>
+        </Slider>
         <!-- Health / Mana display -->
 		<Grid Grid.Row="3" Grid.Column="0" Margin="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="20">
 			<Grid.ColumnDefinitions>
