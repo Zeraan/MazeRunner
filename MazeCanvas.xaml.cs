@@ -28,6 +28,8 @@ namespace MazeRunner
 		CroppedBitmap LockedDoor;
 		CroppedBitmap StairsUp;
 		CroppedBitmap StairsDown;
+		CroppedBitmap Perimeter;
+		CroppedBitmap Blocked;
 
 		public Level Level { get; set; }
 
@@ -45,6 +47,8 @@ namespace MazeRunner
 			Floor = new CroppedBitmap(img, new Int32Rect(128, 0, 32, 32));
 			StairsUp = new CroppedBitmap(img, new Int32Rect(160, 0, 32, 32));
 			StairsDown = new CroppedBitmap(img, new Int32Rect(192, 0, 32, 32));
+			Perimeter = new CroppedBitmap(img, new Int32Rect(128, 32, 32, 32));
+			Blocked = new CroppedBitmap(img, new Int32Rect(160, 32, 32, 32));
 		}
 
 		protected override void OnRender(DrawingContext dc)
@@ -122,6 +126,12 @@ namespace MazeRunner
 							break;
 						case TileType.STAIRS_UP:
 							dc.DrawImage(StairsUp, new Rect(j * 16, i * 16, 16, 16));
+							break;
+						case TileType.PERIMETER:
+							dc.DrawImage(Perimeter, new Rect(j * 16, i * 16, 16, 16));
+							break;
+						case TileType.BLOCKED:
+							dc.DrawImage(Blocked, new Rect(j * 16, i * 16, 16, 16));
 							break;
 					}
 				}

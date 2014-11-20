@@ -1085,11 +1085,7 @@ namespace MazeRunner
 				for (int j = 0; j < Width; j++)
 				{
 					var tile = Tiles[i,j];
-					if ((tile.Flags & Tile.OPENSPACE) > 0)
-					{
-						tile.TileType = TileType.FLOOR;
-					}
-					else if ((tile.Flags & Tile.ARCH) == Tile.ARCH)
+					if ((tile.Flags & Tile.ARCH) == Tile.ARCH)
 					{
 						tile.TileType = TileType.OPEN_DOOR;
 					}
@@ -1108,6 +1104,14 @@ namespace MazeRunner
 					else if ((tile.Flags & Tile.STAIR_DN) == Tile.STAIR_DN)
 					{
 						tile.TileType = TileType.STAIRS_DOWN;
+					}
+					else if ((tile.Flags & Tile.PERIMETER) == Tile.PERIMETER)
+					{
+						tile.TileType = TileType.PERIMETER; //Just fill it up with wall
+					}
+					else if ((tile.Flags & Tile.ROOM) > 0 || (tile.Flags & Tile.CORRIDOR) > 0)
+					{
+						tile.TileType = TileType.FLOOR;
 					}
 					else
 					{
