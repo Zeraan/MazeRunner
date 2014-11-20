@@ -39,8 +39,8 @@ namespace MazeRunner
 			_game.GenerateNextLevel();
 			DataContext = _game;
 			MazeCanvas.Level = _game.CurrentLevel;
-			horizontalScrollbar.Maximum = MazeCanvas.Level.Width - 16;
-			verticalScrollbar.Maximum = MazeCanvas.Level.Height - 16;
+			horizontalScrollbar.Maximum = MazeCanvas.Level.Width;
+			verticalScrollbar.Maximum = MazeCanvas.Level.Height;
 			verticalScrollbar.Value = verticalScrollbar.Maximum;
 			CenterMap();
 		}
@@ -51,26 +51,28 @@ namespace MazeRunner
 			verticalScrollbar.Maximum = MazeCanvas.Level.Height - RowsVisible;
 		}
 
-		private void horizontalScrollbar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		private void horizontalScrollbar_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
 		{
 			MazeCanvas.Left = (int)e.NewValue;
 			MazeCanvas.InvalidateVisual();
 		}
 
-		private void verticalScrollbar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		private void verticalScrollbar_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
 		{
-			var slider = sender as Slider;
-			if (sender != null)
-			{
-				MazeCanvas.Top = (int)(slider.Maximum - e.NewValue);
-				MazeCanvas.InvalidateVisual();
-			}
+			MazeCanvas.Top = (int)(e.NewValue);
+			MazeCanvas.InvalidateVisual();
 		}
 
 		private void CenterMap() //centers to main player
 		{
 			horizontalScrollbar.Value = _game.MainPlayer.Column - (ColumnsVisible / 2);
-			verticalScrollbar.Value = verticalScrollbar.Maximum - (_game.MainPlayer.Row - (RowsVisible / 2));
+			verticalScrollbar.Value = _game.MainPlayer.Row - (RowsVisible / 2);
+			MazeCanvas.InvalidateVisual();
+		}
+
+		private void centerButton_Click(object sender, RoutedEventArgs e)
+		{
+			CenterMap();
 		}
 	}
 }

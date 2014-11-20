@@ -59,9 +59,9 @@ namespace MazeRunner
 				return;
 			}
 
-			for (int i = 0; i < (ActualHeight / 17) + 1; i++)
+			for (int i = 0; i < (ActualHeight / 32) + 1; i++)
 			{
-				for (int j = 0; j < (ActualWidth / 17) + 1; j++)
+				for (int j = 0; j < (ActualWidth / 32) + 1; j++)
 				{
 					if (i + Top >= Level.Height || j + Left >= Level.Width)
 					{
