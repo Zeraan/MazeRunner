@@ -8,7 +8,7 @@ using System.Windows;
 namespace MazeRunner
 {
 	public enum DoorType { ARCH, DOOR, LOCKED/*, TRAPPED, SECRET, PORTC*/ }
-	public enum TileType { FLOOR, WALL, OPEN_DOOR, DOOR, LOCKED_DOOR, STAIRS_DOWN, STAIRS_UP }
+	public enum TileType { FLOOR, WALL, OPEN_DOOR, DOOR, LOCKED_DOOR, STAIRS_DOWN, STAIRS_UP, PERIMETER, BLOCKED }
 	public class Tile
 	{
 		public const uint NOTHING		= 0x00000000;
@@ -251,6 +251,7 @@ namespace MazeRunner
 
 		public Level(int levelNumber)
 		{
+			CorridorLayout = MazeRunner.CorridorLayout.BENT;
 			r = new Random();
 			Rooms = new Dictionary<int, Room>();
 			Stairs = new List<Stair>();
@@ -288,9 +289,9 @@ namespace MazeRunner
 			PlaceRooms();
 			OpenRooms();
 			LabelRooms();
-			/*Corridors();
+			Corridors();
 			PlaceStairs();
-			CleanDungeon();*/
+			CleanDungeon();
 			ConvertTiles(); //Just sets the enum value for simplicity
 		}
 
@@ -781,12 +782,13 @@ namespace MazeRunner
 
 		private string[] TunnelDirections(string lastDirection)
 		{
-			var directionKeysCopy = new List<string>(Direction.DJ.Keys.ToList<string>());
+			var directionKeysCopy = new List<string>(Direction.Directions);
+			directionKeysCopy.Shuffle();
 			if (!string.IsNullOrEmpty(lastDirection) && CorridorLayout != null)
 			{
 				if (r.Next(MazeRunner.CorridorLayout.STRAIGHT) < CorridorLayout)
 				{
-					directionKeysCopy.Remove(lastDirection);
+					directionKeysCopy.Insert(0, lastDirection);
 				}
 			}
 			return directionKeysCopy.ToArray();
@@ -796,10 +798,10 @@ namespace MazeRunner
 		{
 			int thisRow = (i * 2) + 1;
 			int thisColumn = (j * 2) + 1;
-			int nextRow = ((i + Direction.DI[dir]) * 2) + 1;
-			int nextColumn = ((j + Direction.DJ[dir] * 2)) + 1;
-			int midRow = (thisRow + nextRow) / 2;
-			int midColumn = (thisColumn + nextColumn) / 2;
+			int nextRow = thisRow + (Direction.DI[dir] * 2);
+			int nextColumn = thisColumn + (Direction.DJ[dir] * 2);
+			int midRow = thisRow + Direction.DI[dir];
+			int midColumn = thisColumn + Direction.DJ[dir];
 
 			if (SoundTunnel(midRow, midColumn, nextRow, nextColumn))
 			{
@@ -822,7 +824,7 @@ namespace MazeRunner
 			{
 				for (int c = c1; c <= c2; c++)
 				{
-					if (c >= Width || r >= Height)
+					if ((Tiles[r, c].Flags & Tile.PERIMETER) == Tile.PERIMETER)
 					{
 						continue;
 					}
@@ -859,7 +861,7 @@ namespace MazeRunner
 					}
 				}
 			}
-				return true;
+			return true;
 		}
 
 		private void PlaceStairs()
@@ -1083,11 +1085,7 @@ namespace MazeRunner
 				for (int j = 0; j < Width; j++)
 				{
 					var tile = Tiles[i,j];
-					if ((tile.Flags & Tile.BLOCK_CORR) > 0)
-					{
-						tile.TileType = TileType.WALL;
-					}
-					else if ((tile.Flags & Tile.OPENSPACE) > 0)
+					if ((tile.Flags & Tile.OPENSPACE) > 0)
 					{
 						tile.TileType = TileType.FLOOR;
 					}
