@@ -58,6 +58,7 @@
     <Compile Include="MazeCanvas.xaml.cs">
       <DependentUpon>MazeCanvas.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Person.cs" />
     <Compile Include="Utilities.cs" />
     <Page Include="CustomBar.xaml">
       <Generator>MSBuild:Compile</Generator>

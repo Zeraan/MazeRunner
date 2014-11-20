@@ -29,7 +29,23 @@ namespace MazeRunner
 		}
 	}
 
-	
+	public class Point
+	{
+		public int R;
+		public int C;
+
+		public Point()
+		{
+			R = 0;
+			C = 0;
+		}
+
+		public Point(int r, int c)
+		{
+			R = r;
+			C = c;
+		}
+	}
 
 	public class MazeOptions
 	{

@@ -277,10 +277,14 @@ namespace MazeRunner
 		public void SetStartingPoint()
 		{
 			// TODO: when placing player, check to make sure location is a valid position without monsters close by
-			int x = r.Next(0, Width - 1);
-			int y = r.Next(0, Height - 1);
-
-			StartingPoint = new Point(x,y);
+			foreach (var stair in Stairs)
+			{
+				if (!stair.IsDownward)
+				{
+					StartingPoint = new Point(stair.Row, stair.Column);
+					break;
+				}
+			}
 		}
 
 		private void GenerateRandomLevel(int levelNumber)
@@ -1132,8 +1136,13 @@ namespace MazeRunner
 		public LevelManager()
 		{
 			Levels = new List<Level>();
-			Level firstLevel = new Level(1);
-			Levels.Add(firstLevel);
+			GenerateNextLevel();
+		}
+
+		public void GenerateNextLevel()
+		{
+			var newLevel = new Level(Levels.Count + 1);
+			Levels.Add(newLevel);
 		}
 	}
 }

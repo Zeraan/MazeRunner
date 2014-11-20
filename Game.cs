@@ -18,14 +18,12 @@ namespace MazeRunner
 
 		#endregion Data Members
 
-		public int NumMapHorizontalTilesVisible { get { return 11; } }
-		public int NumMapVerticalTilesVisible { get { return 11; } }
-		public int NumMiniMapHorizontalTilesVisible { get { return 21; } }
-		public int NumMiniMapVerticalTilesVisible { get { return 21; } }
 
 		public LevelManager LevelManager { get; set; }
 
-		public Point PlayerPosition { get; set; }
+		public Person MainPlayer { get; set; }
+
+		public Action CenterMap;
 
 		public Level CurrentLevel
 		{
@@ -33,106 +31,27 @@ namespace MazeRunner
 			set
 			{
 				_currentLevel = value;
-				PlayerPosition = CurrentLevel.StartingPoint;
-				UpdateGameTiles();
-				UpdateMiniMapTiles();
-				OnChange(() => CurrentLevel);
-			}
-		}
-
-		public List<Tile> VisibleTiles
-		{
-			get { return _currentGameTiles; }
-			set
-			{
-				_currentGameTiles = value;
-				OnChange(() => VisibleTiles);
-			}
-		}
-
-
-		public List<Tile> MiniMapTiles
-		{
-			get { return _minimapTiles; }
-			set
-			{
-				_minimapTiles = value;
-				OnChange(() => MiniMapTiles);
+				MainPlayer.Column = CurrentLevel.StartingPoint.C;
+				MainPlayer.Row = CurrentLevel.StartingPoint.R;
 			}
 		}
 
 		public Game()
 		{
-			InitLevel();
+			MainPlayer = new Person();
 		}
 
-		private void InitLevel()
+		public void GenerateNextLevel()
 		{
 			if (LevelManager == null)
 			{
 				LevelManager = new LevelManager();
 				CurrentLevel = LevelManager.Levels[0];
 			}
-		}
-
-		public void TraverseLevel(int level)
-		{
-			// Only accept valid levels
-			/*if (level <= 0 || level > Levels.Count + 1) return;
-
-			if (Levels.Count == Levels.Count + 1)
-			{
-				Level newLevel = new Level(Levels.Count + 1);
-				Levels.Add(newLevel);
-			}
 			else
 			{
-				CurrentLevel = Levels[level];
-			}*/
-		}
-
-		public void UpdateGameTiles()
-		{
-			Point startPoint = CalcFirstPoint(NumMapHorizontalTilesVisible, NumMapVerticalTilesVisible);
-			Point endPoint = CalcLastPoint(NumMapHorizontalTilesVisible, NumMapVerticalTilesVisible);
-			VisibleTiles = new List<Tile>();
-
-			for (int x = (int)startPoint.X; x <= endPoint.X; x++)
-			{
-				for (int y = (int) startPoint.Y; y <= endPoint.Y; y++)
-				{
-					if (x < 0 || x >= CurrentLevel.Height || y < 0 || y >= CurrentLevel.Width)
-						VisibleTiles.Add(new Tile() { Flags = Tile.BLOCKED});
-					else VisibleTiles.Add(CurrentLevel.Tiles[x, y]);
-				}
+				LevelManager.GenerateNextLevel();
 			}
-		}
-
-		public void UpdateMiniMapTiles()
-		{
-			Point startPoint = CalcFirstPoint(NumMiniMapHorizontalTilesVisible, NumMiniMapVerticalTilesVisible);
-			Point endPoint = CalcLastPoint(NumMiniMapHorizontalTilesVisible, NumMiniMapVerticalTilesVisible);
-			VisibleTiles = new List<Tile>();
-
-			for (int x = (int)startPoint.X; x <= endPoint.X; x++)
-			{
-				for (int y = (int)startPoint.Y; y <= endPoint.Y; y++)
-				{
-					if (x < 0 || x >= CurrentLevel.Height || y < 0 || y >= CurrentLevel.Width)
-						VisibleTiles.Add(new Tile() { Flags = Tile.BLOCKED });
-					else VisibleTiles.Add(CurrentLevel.Tiles[x, y]);
-				}
-			}
-		}
-
-		public Point CalcFirstPoint(int width, int height)
-		{
-			return new Point(PlayerPosition.X - (width / 2), PlayerPosition.Y - (height / 2));
-		}
-
-		public Point CalcLastPoint(int width, int height)
-		{
-			return new Point(PlayerPosition.X + (width / 2), PlayerPosition.Y + (height / 2));
 		}
 
 		#region INotifyPropertyChangedHandler
