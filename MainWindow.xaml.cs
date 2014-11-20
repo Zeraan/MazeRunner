@@ -41,5 +41,11 @@ namespace MazeRunner
 			MazeCanvas.Top = (int)e.NewValue;
 			MazeCanvas.InvalidateVisual();
 		}
+
+		private void _mazeRunnerWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			horizontalScrollbar.Maximum = MazeCanvas.Level.Width - MazeCanvas.ActualWidth / 32 + 1;
+			verticalScrollbar.Maximum = MazeCanvas.Level.Height - MazeCanvas.ActualHeight / 32 + 1;
+		}
 	}
 }

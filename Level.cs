@@ -252,6 +252,7 @@ namespace MazeRunner
 		public Level(int levelNumber)
 		{
 			CorridorLayout = MazeRunner.CorridorLayout.BENT;
+			//RemoveDeadEndsPercent = 50;
 			r = new Random();
 			Rooms = new Dictionary<int, Room>();
 			Stairs = new List<Stair>();
@@ -1027,11 +1028,11 @@ namespace MazeRunner
 				for (int j = 0; j < N_J; j++)
 				{
 					int c = (j * 2) + 1;
-					if ((Tiles[r,c].Flags & Tile.OPENSPACE) != Tile.OPENSPACE)
+					if ((Tiles[r, c].Flags & Tile.OPENSPACE) == 0)
 					{
 						continue;
 					}
-					if ((Tiles[r,c].Flags & Tile.STAIRS) == Tile.STAIRS)
+					if ((Tiles[r,c].Flags & Tile.STAIRS) > 0)
 					{
 						continue;
 					}
@@ -1045,13 +1046,13 @@ namespace MazeRunner
 
 		private void Collapse(int r, int c)
 		{
-			if ((Tiles[r,c].Flags & Tile.OPENSPACE) != Tile.OPENSPACE)
+			if ((Tiles[r, c].Flags & Tile.OPENSPACE) == 0)
 			{
 				return;
 			}
 
 			var xc = CloseData.CloseEnd;
-			foreach(string direction in xc.Keys)
+			foreach(string direction in Direction.Directions)
 			{
 				if (CheckTunnel(r, c, xc[direction]))
 				{
@@ -1107,7 +1108,7 @@ namespace MazeRunner
 					}
 					else if ((tile.Flags & Tile.PERIMETER) == Tile.PERIMETER)
 					{
-						tile.TileType = TileType.PERIMETER; //Just fill it up with wall
+						tile.TileType = TileType.WALL; //Just fill it up with wall
 					}
 					else if ((tile.Flags & Tile.ROOM) > 0 || (tile.Flags & Tile.CORRIDOR) > 0)
 					{

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mazeRunner="clr-namespace:MazeRunner"
 		x:Name="_mazeRunnerWindow"
-        Title="MainWindow" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
+        Title="MainWindow" SizeToContent="WidthAndHeight" SizeChanged="_mazeRunnerWindow_SizeChanged" >
     <Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="50"/>

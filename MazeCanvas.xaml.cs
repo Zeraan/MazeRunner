@@ -59,10 +59,9 @@ namespace MazeRunner
 				return;
 			}
 
-			/*
-			for (int i = 0; i < 17; i++)
+			for (int i = 0; i < (ActualHeight / 17) + 1; i++)
 			{
-				for (int j = 0; j < 17; j++)
+				for (int j = 0; j < (ActualWidth / 17) + 1; j++)
 				{
 					if (i + Top >= Level.Height || j + Left >= Level.Width)
 					{
@@ -91,47 +90,6 @@ namespace MazeRunner
 							break;
 						case TileType.STAIRS_UP:
 							dc.DrawImage(StairsUp, new Rect(j * 32, i * 32, 32, 32));
-							break;
-					}
-				}
-			}*/
-			for (int i = 0; i < 34; i++)
-			{
-				for (int j = 0; j < 34; j++)
-				{
-					if (i + Top >= Level.Height || j + Left >= Level.Width)
-					{
-						continue;
-					}
-					var tile = Level.Tiles[i + Top,j + Left];
-					switch (tile.TileType)
-					{
-						case TileType.FLOOR:
-							dc.DrawImage(Floor, new Rect(j * 16, i * 16, 16, 16));
-							break;
-						case TileType.WALL:
-							dc.DrawImage(Wall, new Rect(j * 16, i * 16, 16, 16));
-							break;
-						case TileType.DOOR:
-							dc.DrawImage(CloseDoor, new Rect(j * 16, i * 16, 16, 16));
-							break;
-						case TileType.OPEN_DOOR:
-							dc.DrawImage(OpenDoor, new Rect(j * 16, i * 16, 16, 16));
-							break;
-						case TileType.LOCKED_DOOR:
-							dc.DrawImage(LockedDoor, new Rect(j * 16, i * 16, 16, 16));
-							break;
-						case TileType.STAIRS_DOWN:
-							dc.DrawImage(StairsDown, new Rect(j * 16, i * 16, 16, 16));
-							break;
-						case TileType.STAIRS_UP:
-							dc.DrawImage(StairsUp, new Rect(j * 16, i * 16, 16, 16));
-							break;
-						case TileType.PERIMETER:
-							dc.DrawImage(Perimeter, new Rect(j * 16, i * 16, 16, 16));
-							break;
-						case TileType.BLOCKED:
-							dc.DrawImage(Blocked, new Rect(j * 16, i * 16, 16, 16));
 							break;
 					}
 				}
