@@ -19,8 +19,8 @@
 		</Grid.ColumnDefinitions>
         <!--<mazeRunner:MazeControl Grid.Row="1" Margin="5,0,0,0" TileSize="50" NumVerticalTiles="{Binding NumMapVerticalTilesVisible}" NumHorizontalTiles="{Binding NumMapHorizontalTilesVisible}"/>-->
         <mazeRunner:MazeCanvas x:Name="MazeCanvas" Grid.Row="1" />
-        <ScrollBar x:Name="horizontalScrollbar" Grid.Row="2" Orientation="Horizontal" Height="36" Scroll="horizontalScrollbar_Scroll" ViewportSize="10"/>
-        <ScrollBar x:Name="verticalScrollbar" Grid.Row="1" Grid.Column="1" Width="36" HorizontalAlignment="Left" Scroll="verticalScrollbar_Scroll" ViewportSize="10"/>
+        <ScrollBar x:Name="horizontalScrollbar" Grid.Row="2" Orientation="Horizontal" Height="36" Scroll="horizontalScrollbar_Scroll" />
+        <ScrollBar x:Name="verticalScrollbar" Grid.Row="1" Grid.Column="1" Width="36" HorizontalAlignment="Left" Scroll="verticalScrollbar_Scroll" />
         <Button Grid.Row="2" Grid.Column="1" x:Name="centerButton" Click="centerButton_Click"/>
         <!-- Health / Mana display -->
 		<Grid Grid.Row="3" Grid.Column="0" Margin="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="20">

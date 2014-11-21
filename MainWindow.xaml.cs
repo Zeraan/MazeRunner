@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -24,11 +25,11 @@ namespace MazeRunner
 
 		private int ColumnsVisible
 		{
-			get { return (int)(MazeCanvas.ActualWidth / 32 + 1); }
+			get { return (int)(MazeCanvas.ActualWidth / 32); }
 		}
 		private int RowsVisible
 		{
-			get { return (int)(MazeCanvas.ActualWidth / 32 + 1); }
+			get { return (int)(MazeCanvas.ActualHeight / 32); }
 		}
 
 		public MainWindow()
@@ -39,9 +40,10 @@ namespace MazeRunner
 			_game.GenerateNextLevel();
 			DataContext = _game;
 			MazeCanvas.Level = _game.CurrentLevel;
-			horizontalScrollbar.Maximum = MazeCanvas.Level.Width;
-			verticalScrollbar.Maximum = MazeCanvas.Level.Height;
-			verticalScrollbar.Value = verticalScrollbar.Maximum;
+			horizontalScrollbar.Maximum = MazeCanvas.Level.Width - ColumnsVisible;
+			verticalScrollbar.Maximum = MazeCanvas.Level.Height - RowsVisible;
+			horizontalScrollbar.SetThumbLength(10);
+			verticalScrollbar.SetThumbLength(10);
 			CenterMap();
 		}
 
@@ -65,8 +67,22 @@ namespace MazeRunner
 
 		private void CenterMap() //centers to main player
 		{
-			horizontalScrollbar.Value = _game.MainPlayer.Column - (ColumnsVisible / 2);
-			verticalScrollbar.Value = _game.MainPlayer.Row - (RowsVisible / 2);
+			int col = _game.MainPlayer.Column - (ColumnsVisible / 2);
+			int row = _game.MainPlayer.Row - (RowsVisible / 2) - 5;
+			if (col + ColumnsVisible > horizontalScrollbar.Maximum)
+			{
+				col = (int)horizontalScrollbar.Maximum - ColumnsVisible;
+			}
+			if (row + RowsVisible > verticalScrollbar.Maximum)
+			{
+				row = (int)verticalScrollbar.Maximum - RowsVisible;
+			}
+			horizontalScrollbar.SetThumbCenter(col);
+			verticalScrollbar.SetThumbCenter(row);
+			MazeCanvas.Top = (int)(verticalScrollbar.Value);
+			MazeCanvas.Left = (int)horizontalScrollbar.Value;
+			/*horizontalScrollbar.Value = _game.MainPlayer.Column - (ColumnsVisible / 2);
+			verticalScrollbar.Value = _game.MainPlayer.Row - (RowsVisible / 2);*/
 			MazeCanvas.InvalidateVisual();
 		}
 
@@ -74,5 +90,60 @@ namespace MazeRunner
 		{
 			CenterMap();
 		}
+
+		 
+	}
+
+	public static class ScrollBarExtensions
+	{
+		public static void SetThumbCenter(this ScrollBar s, double thumbCenter)
+		{
+			double thumbLength = GetThumbLength(s);
+			double trackLength = s.Maximum - s.Minimum;
+
+			if (thumbCenter >= s.Maximum - thumbLength / 2)
+			{
+				s.Value = s.Maximum;
+			}
+			else if (thumbCenter <= s.Minimum + thumbLength / 2)
+			{
+				s.Value = s.Minimum;
+			}
+			else if (thumbLength >= trackLength)
+			{
+				s.Value = s.Minimum;
+			}
+			else
+			{
+				s.Value = s.Minimum + trackLength *
+					((thumbCenter - s.Minimum - thumbLength / 2)
+					/ (trackLength - thumbLength));
+			}
+		}
+
+		public static double GetThumbLength(this ScrollBar s)
+		{
+			double trackLength = s.Maximum - s.Minimum;
+			return trackLength * s.ViewportSize /
+				(trackLength + s.ViewportSize);
+		}
+
+		public static void SetThumbLength(this ScrollBar s, double thumbLength)
+		{
+			double trackLength = s.Maximum - s.Minimum;
+
+			if (thumbLength < 0)
+			{
+				s.ViewportSize = 0;
+			}
+			else if (thumbLength < trackLength)
+			{
+				s.ViewportSize = trackLength * thumbLength / (trackLength - thumbLength);
+			}
+			else
+			{
+				s.ViewportSize = double.MaxValue;
+			}
+		} 
 	}
 }
